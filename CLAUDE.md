@@ -82,6 +82,32 @@ src/
   assets/       static images/fonts
 ```
 
+## Supabase
+
+Database and auth backend. Client singleton: `src/lib/supabase/client.ts`. Auth helpers: `src/lib/supabase/auth.ts`.
+
+**Do not use `@supabase/ssr`** — Vite SPA, not Next.js. Token refresh is automatic in `supabase-js`.
+
+### For contributors (everyone)
+
+Create `.env.local` in the project root — ask the project owner for the values:
+
+```
+VITE_SUPABASE_URL=...
+VITE_SUPABASE_PUBLISHABLE_KEY=...
+```
+
+### For the project owner only
+
+```bash
+pnpm supabase init                          # one-time: creates supabase/migrations/
+pnpm supabase link --project-ref <ref>      # link local CLI to the remote project
+pnpm supabase migration new <name>          # create a new migration file
+pnpm supabase db push                       # apply pending migrations to remote
+```
+
+Contributors never run `init` or `link` — they only need `.env.local`.
+
 ## Role System (Planned)
 
 No backend or auth exists yet. Roles (admin / user) will initially be simulated via mock data or context. When auth is added, role-based rendering should be gated at the route level, not scattered in components.

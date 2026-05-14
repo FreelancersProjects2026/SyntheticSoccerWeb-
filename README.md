@@ -34,6 +34,19 @@ Booking platform for synthetic soccer fields. Admins manage fields and availabil
 
 ## Getting started
 
+### 1. Set up environment variables
+
+Create `.env.local` in the root of the project. Ask the project owner for the credentials:
+
+```env
+VITE_SUPABASE_URL=...
+VITE_SUPABASE_PUBLISHABLE_KEY=...
+```
+
+> **Owner only:** The Supabase project, `supabase init`, `supabase link`, and migration commands are managed exclusively by the project owner. Contributors only need `.env.local` to connect.
+
+### 2. Install and run
+
 ```bash
 # Install dependencies
 pnpm install
