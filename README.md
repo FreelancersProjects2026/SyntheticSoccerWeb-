@@ -1,50 +1,50 @@
 # Synthetic Soccer Web
 
-Plataforma de reservas para canchas sintéticas de fútbol. Permite a administradores gestionar canchas y disponibilidad, y a usuarios agendar, reprogramar y buscar retos.
+Booking platform for synthetic soccer fields. Admins manage fields and availability; users book, reschedule, and challenge other teams.
 
 ---
 
-## Características
+## Features
 
-### Administrador
-- Agregar y editar canchas (nombre, descripción, capacidad)
-- Configurar disponibilidad: fechas y franjas horarias
-- Ver calendario de reservas activas
+### Admin
+- Add and edit fields (name, description, capacity)
+- Set availability: dates and time slots
+- View the active reservations calendar
 
-### Usuario
-- Buscar canchas disponibles por fecha y hora
-- Agendar y reprogramar reservas
-- Buscar reto — publicar o aceptar desafíos de otros equipos en slots disponibles
+### User
+- Search available fields by date and time
+- Book and reschedule reservations
+- Challenge mode — post or accept match challenges from other teams on open slots
 
 ---
 
 ## Stack
 
-| Capa | Tecnología |
+| Layer | Technology |
 |---|---|
 | Build | Vite 8 |
 | UI | React 19 + TypeScript 6 |
-| Estilos | Tailwind CSS 4 |
+| Styling | Tailwind CSS 4 |
 | PWA | vite-plugin-pwa + Workbox |
 | Linting | ESLint 10 + typescript-eslint |
-| Formato | Prettier 3 + prettier-plugin-tailwindcss |
+| Formatting | Prettier 3 + prettier-plugin-tailwindcss |
 | Package manager | pnpm |
 
 ---
 
-## Inicio rápido
+## Getting started
 
 ```bash
-# Instalar dependencias
+# Install dependencies
 pnpm install
 
-# Servidor de desarrollo
+# Start dev server
 pnpm dev
 
-# Build de producción
+# Production build
 pnpm build
 
-# Preview del build
+# Preview the build
 pnpm preview
 ```
 
@@ -52,43 +52,43 @@ pnpm preview
 
 ## Scripts
 
-| Comando | Descripción |
+| Command | Description |
 |---|---|
-| `pnpm dev` | Servidor local en `localhost:5173` |
-| `pnpm build` | Compila TypeScript y genera bundle en `dist/` |
-| `pnpm preview` | Sirve el build de producción localmente |
-| `pnpm lint` | Analiza el código con ESLint |
-| `pnpm lint:fix` | Corrige errores de lint automáticamente |
-| `pnpm format` | Formatea `src/` con Prettier |
-| `pnpm type-check` | Verificación de tipos sin emitir archivos |
+| `pnpm dev` | Local dev server at `localhost:5173` |
+| `pnpm build` | Type-check + bundle into `dist/` |
+| `pnpm preview` | Serve the production build locally |
+| `pnpm lint` | Run ESLint |
+| `pnpm lint:fix` | Run ESLint with auto-fix |
+| `pnpm format` | Format `src/` with Prettier |
+| `pnpm type-check` | Type-check without emitting files |
 
 ---
 
-## Estructura del proyecto
+## Project structure
 
 ```
 src/
-├── components/    Componentes reutilizables (UI, formularios, calendario)
-├── pages/         Vistas por ruta
-├── hooks/         Custom hooks de React
-├── types/         Interfaces TypeScript compartidas (Cancha, Reserva, Reto, User)
-├── utils/         Funciones puras (fechas, validaciones, slots)
-└── assets/        Imágenes y fuentes estáticas
+├── components/    Reusable UI (forms, calendar, cards)
+├── pages/         One file per route/view
+├── hooks/         Custom React hooks
+├── types/         Shared TypeScript interfaces (Field, Reservation, Challenge, User)
+├── utils/         Pure helpers (date formatting, slot availability, validation)
+└── assets/        Static images and fonts
 ```
 
 ---
 
 ## PWA
 
-La app funciona como Progressive Web App. Al ejecutar `pnpm build`, Workbox genera automáticamente el service worker (`dist/sw.js`) y el web manifest. En desarrollo, el SW también está activo para facilitar pruebas.
+The app ships as a Progressive Web App. Running `pnpm build` auto-generates the service worker (`dist/sw.js`) and web manifest via Workbox. The service worker is also active in dev for easier testing.
 
-Para instalar en móvil: abre la app en el navegador → "Agregar a pantalla de inicio".
+To install on mobile: open the app in a browser → "Add to Home Screen".
 
 ---
 
-## Convenciones de código
+## Code conventions
 
-- **Imports absolutos:** usar `@/` en lugar de rutas relativas (`@/components/Button`)
-- **Package manager:** solo `pnpm`, nunca `npm` o `yarn`
-- **Formato:** Prettier corre automáticamente al guardar (VS Code con la extensión recomendada)
-- **Tailwind:** las clases se ordenan automáticamente al formatear con `prettier-plugin-tailwindcss`
+- **Absolute imports:** use `@/` instead of relative paths (`@/components/Button`)
+- **Package manager:** `pnpm` only — never `npm` or `yarn`
+- **Formatting:** Prettier runs on save in VS Code (install the recommended extension)
+- **Tailwind:** class order is auto-sorted on format via `prettier-plugin-tailwindcss`
