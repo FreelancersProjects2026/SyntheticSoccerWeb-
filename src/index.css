@@ -74,3 +74,9 @@ h4 {
   -webkit-text-stroke: 1.5px #072f1a;
   color: transparent;
 }
+
+/* Prevent text blurriness during GSAP transform animations */
+[data-gsap] {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}

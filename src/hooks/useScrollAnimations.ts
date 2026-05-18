@@ -17,6 +17,7 @@ export function useParallaxScroll() {
           scale: 1.04,
           y: -20,
           ease: 'none',
+          force3D: false,
           scrollTrigger: {
             trigger: sectionRef.current,
             start: 'top top',
@@ -45,6 +46,7 @@ export function useWordScrub() {
           { opacity: 0.12 },
           {
             opacity: 1,
+            force3D: false,
             scrollTrigger: {
               trigger: titleRef.current,
               start: 'top 80%',
@@ -75,6 +77,8 @@ export function useStaggerEntrance(selector: string) {
             opacity: 1,
             duration: 0.9,
             ease: 'power3.out',
+            force3D: false,
+            roundPixels: true,
             scrollTrigger: {
               trigger: item,
               start: 'top 87%',

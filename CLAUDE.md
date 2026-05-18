@@ -36,7 +36,11 @@ Booking platform for synthetic soccer fields (canchas sintéticas).
 |---|---|
 | Build | Vite 8 + `@vitejs/plugin-react` |
 | UI | React 19 + TypeScript 6 |
+| Routing | React Router v7 (`react-router-dom@7`) |
 | Styling | Tailwind CSS 4 (via `@tailwindcss/vite` plugin — no `tailwind.config.ts` needed) |
+| Animations | GSAP 3 + ScrollTrigger |
+| Fonts | Syne (display/headings), DM Sans (body) — loaded from Google Fonts in `index.html` |
+| Backend | Supabase (`@supabase/supabase-js@2`) |
 | PWA | `vite-plugin-pwa` + Workbox (service worker auto-generated on build) |
 | Linting | ESLint 10 with `typescript-eslint` + `eslint-plugin-react-hooks` |
 | Formatting | Prettier 3 + `prettier-plugin-tailwindcss` (auto-sorts class names) |
@@ -70,23 +74,110 @@ Import with a single line in `src/index.css`:
 
 No `postcss.config.js` needed — Tailwind runs as a Vite plugin.
 
-## Planned Structure
+Custom theme tokens defined in `src/index.css` via `@theme`:
+
+| Token | Value | Use |
+|---|---|---|
+| `--color-snow` | `#f9f9f8` | Light background |
+| `--color-ink` | `#072f1a` | Dark text / dark sections |
+| `--color-emerald` | `#12d176` | Primary brand green |
+| `--font-sans` | DM Sans | Body text |
+| `--font-display` | Syne | Headings |
+
+## Current Structure
 
 ```
 src/
-  components/   reusable UI (buttons, cards, modals, calendar)
-  pages/        one file per route/view
-  hooks/        custom React hooks
-  types/        shared TypeScript interfaces (Cancha, Reserva, User, Reto)
-  utils/        pure helper functions (date formatting, slot availability)
-  assets/       static images/fonts
+  components/
+    Button.tsx          stub — TODO
+    ProtectedRoute.tsx  route guard (requiredRole prop)
+  context/
+    AuthContext.tsx     auth state + profile, provides useAuth()
+  hooks/
+    useAuth.ts          re-exports useAuth from AuthContext
+    useScrollAnimations.ts  GSAP hooks: useParallaxScroll, useWordScrub, useStaggerEntrance
+  lib/
+    supabase/
+      client.ts         Supabase singleton (VITE_SUPABASE_URL + VITE_SUPABASE_PUBLISHABLE_KEY)
+      auth.ts           getSession(), onAuthStateChange(), AuthState type
+  pages/
+    Home.tsx            landing page (hero, marquee, features bento, how-it-works, retos, CTA, footer)
+    Login.tsx           split-panel login form, redirects by role on success
+    Register.tsx        split-panel register form, upserts profile to usuarios table
+    admin/
+      AdminLayout.tsx   collapsible sidebar + top header shell for all /admin/* routes
+      Dashboard.tsx     stat cards (stub data) + recent activity skeleton
+      Canchas.tsx       empty state + "New field" button (non-functional)
+      Reservas.tsx      empty state table (non-functional)
+      Usuarios.tsx      empty state table (non-functional)
+  utils/
+    constants.ts        NAV_LINKS, HERO_STATS, MARQUEE_ITEMS, FEATURES, STEPS, RETO_CHALLENGES, FOOTER_LINKS, CLS, CARD_STYLES
+    format.ts           stub — TODO
+  types/               stub — TODO: Cancha, Reserva, User, Reto interfaces
+  assets/              static images/fonts
+  App.tsx              route definitions
+  main.tsx             React entry point
+  index.css            global styles + Tailwind + custom theme
 ```
+
+## Routing
+
+```
+/               Home (public)
+/login          Login (public, redirects if already authed)
+/register       Register (public, redirects if already authed)
+/admin          → AdminLayout
+  /admin        Dashboard  (requiredRole: admin)
+  /admin/canchas    Canchas    (requiredRole: admin)
+  /admin/reservas   Reservas   (requiredRole: admin)
+  /admin/usuarios   Usuarios   (requiredRole: admin)
+```
+
+`ProtectedRoute` wraps any route that needs auth. It checks `loading`, then `session`, then `profile.rol` — redirecting to `/login` or `/` as appropriate.
+
+## Auth & Context
+
+`AuthContext` (`src/context/AuthContext.tsx`) is the single source of truth for auth state:
+
+```ts
+type Profile = { id: string; nombre: string; telefono: string; rol: 'admin' | 'user' }
+
+// Provided via useAuth():
+{ user, session, profile, loading, signOut }
+```
+
+On `onAuthStateChange`, it fetches the corresponding row from `usuarios` and stores it as `profile`. All role checks should read `profile.rol`.
+
+## GSAP Animations
+
+Three reusable hooks in `src/hooks/useScrollAnimations.ts`:
+
+| Hook | Effect |
+|---|---|
+| `useParallaxScroll(ref, { scale, y })` | Scale + translate on scroll |
+| `useWordScrub(ref)` | Word-by-word opacity reveal tied to scroll position |
+| `useStaggerEntrance(ref, selector)` | Staggered fade-in/slide-up for child elements |
+
+All hooks register ScrollTrigger internally and clean up on unmount. Import GSAP only from `gsap` — do not import ScrollTrigger separately (already registered in the hooks).
 
 ## Supabase
 
 Database and auth backend. Client singleton: `src/lib/supabase/client.ts`. Auth helpers: `src/lib/supabase/auth.ts`.
 
 **Do not use `@supabase/ssr`** — Vite SPA, not Next.js. Token refresh is automatic in `supabase-js`.
+
+### Database Tables
+
+| Table | Description |
+|---|---|
+| `roles` | Lookup: `{ id: smallint, name: text }` — rows: 'cliente', 'administrador'. RLS: read-only for all. |
+| `usuarios` | User profiles: `{ id uuid FK auth.users, nombre, telefono, rol, created_at }`. RLS: users can read/update/insert only their own row. A trigger `handle_new_user()` auto-creates a profile on `auth.signup`, pulling `nombre` and `telefono` from `raw_user_meta_data`. |
+
+### Pending Tables (not yet created)
+
+- `canchas` — soccer field records
+- `reservas` — bookings
+- `retos` — team challenges
 
 ### For contributors (everyone)
 
@@ -108,6 +199,32 @@ pnpm supabase db push                       # apply pending migrations to remote
 
 Contributors never run `init` or `link` — they only need `.env.local`.
 
-## Role System (Planned)
+## Role System
 
-No backend or auth exists yet. Roles (admin / user) will initially be simulated via mock data or context. When auth is added, role-based rendering should be gated at the route level, not scattered in components.
+Auth and roles are fully implemented. Roles flow from Supabase `auth.users` → `usuarios.rol` → `AuthContext.profile.rol` → `ProtectedRoute`.
+
+- `'admin'` — access to all `/admin/*` routes
+- `'user'` — standard authenticated user (no admin routes)
+
+Role-based rendering is gated at the route level via `ProtectedRoute`, not scattered in components.
+
+## Implementation Status (as of 2026-05-18)
+
+### Done
+- Landing page with GSAP scroll animations (parallax, word scrub, staggered entrance)
+- Auth: email/password signup & login via Supabase
+- Role-based protected routes (`ProtectedRoute`)
+- `AuthContext` with profile fetching from `usuarios`
+- `usuarios` + `roles` DB tables with RLS + auto-create trigger
+- Admin layout shell (sidebar + header, responsive)
+- Admin stub pages: Dashboard (skeleton), Canchas, Reservas, Usuarios
+
+### Not yet implemented
+- Cancha CRUD (create/edit/delete fields in admin)
+- Reserva CRUD (booking flow for users)
+- Retos system (challenge matching)
+- Real data in Dashboard stats
+- `tipos`, `canchas`, `reservas`, `retos` DB migrations
+- `src/types/` shared interfaces (Cancha, Reserva, Reto)
+- `src/utils/format.ts` date/slot helpers
+- `src/components/Button.tsx` (only a stub exists)

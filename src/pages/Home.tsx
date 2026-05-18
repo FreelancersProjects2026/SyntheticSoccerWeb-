@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import {
   NAV_LINKS,
   HERO_STATS,
@@ -11,12 +12,16 @@ import {
   CARD_STYLES,
 } from '@/utils/constants'
 import { useParallaxScroll, useWordScrub, useStaggerEntrance } from '@/hooks/useScrollAnimations'
+import { useAuth } from '@/context/AuthContext'
 
 // ─── COMPONENTS ───────────────────────────────────────────────────────────────
 
 function Nav() {
   const [scrolled, setScrolled] = useState(false)
   const [hovered, setHovered] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const { user, profile, signOut } = useAuth()
+  const navigate = useNavigate()
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 80)
@@ -24,52 +29,165 @@ function Nav() {
     return () => window.removeEventListener('scroll', handler)
   }, [])
 
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? 'hidden' : ''
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [menuOpen])
+
   const expanded = !scrolled || hovered
 
-  return (
-    <div className="pointer-events-none fixed top-5 right-0 left-0 z-50 flex justify-center">
-      <nav
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        className={`pointer-events-auto flex items-center gap-1 rounded-full border bg-[#F9F9F8]/85 p-1.5 backdrop-blur-2xl transition-all duration-500 ease-in-out ${
-          scrolled && !hovered
-            ? 'border-[#121210]/[0.12] shadow-[0_8px_28px_rgba(0,0,0,0.10)]'
-            : 'border-[#121210]/[0.07] shadow-[0_4px_16px_rgba(0,0,0,0.07)]'
-        }`}
-      >
-        {/* Logo */}
-        <div className="flex items-center gap-2 rounded-full px-4 py-2">
-          <div className="h-1.5 w-1.5 rounded-full bg-[#12D176]" />
-          <span className="text-xs font-bold tracking-[0.22em] text-[#072f1a] uppercase">
-            Cancha
-          </span>
-        </div>
+  async function handleSignOut() {
+    await signOut()
+    setMenuOpen(false)
+    navigate('/')
+  }
 
-        {/* Links — collapse on scroll, re-expand on hover */}
-        <div
-          className={`hidden items-center overflow-hidden transition-all duration-500 ease-in-out md:flex ${
-            expanded ? 'max-w-[440px] opacity-100' : 'pointer-events-none max-w-0 opacity-0'
+  return (
+    <>
+      <div className="pointer-events-none fixed top-5 right-0 left-0 z-50 flex justify-center">
+        <nav
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
+          className={`pointer-events-auto flex items-center gap-1 rounded-full border bg-[#F9F9F8]/85 p-1.5 backdrop-blur-2xl transition-all duration-500 ease-in-out ${
+            scrolled && !hovered
+              ? 'border-[#121210]/[0.12] shadow-[0_8px_28px_rgba(0,0,0,0.10)]'
+              : 'border-[#121210]/[0.07] shadow-[0_4px_16px_rgba(0,0,0,0.07)]'
           }`}
         >
-          <div className="mx-1 h-4 w-px shrink-0 bg-[#121210]/[0.10]" />
+          {/* Logo */}
+          <div className="flex items-center gap-2 rounded-full px-4 py-2">
+            <div className="h-1.5 w-1.5 rounded-full bg-[#12D176]" />
+            <span className="text-xs font-bold tracking-[0.22em] text-[#072f1a] uppercase">
+              Cancha
+            </span>
+          </div>
+
+          {/* Links — collapse on scroll, re-expand on hover (desktop only) */}
+          <div
+            className={`hidden items-center overflow-hidden transition-all duration-500 ease-in-out md:flex ${
+              expanded ? 'max-w-[440px] opacity-100' : 'pointer-events-none max-w-0 opacity-0'
+            }`}
+          >
+            <div className="mx-1 h-4 w-px shrink-0 bg-[#121210]/[0.10]" />
+            {NAV_LINKS.map((link) => (
+              <a
+                key={link}
+                href={`#${link.toLowerCase()}`}
+                className="rounded-full px-4 py-2 text-[11px] font-medium whitespace-nowrap text-[#57534E] transition-all duration-200 hover:bg-[#121210]/[0.05] hover:text-[#121210]"
+              >
+                {link}
+              </a>
+            ))}
+            <div className="mx-1 h-4 w-px shrink-0 bg-[#121210]/[0.10]" />
+          </div>
+
+          {/* CTA — unauthenticated (desktop) */}
+          {!user && (
+            <Link
+              to="/login"
+              className="hidden rounded-full bg-[#072f1a] px-5 py-2 text-xs font-bold text-[#F2F0EB] transition-all duration-200 hover:scale-105 hover:bg-[#0d4526] active:scale-95 md:block"
+            >
+              Entrar
+            </Link>
+          )}
+
+          {/* CTA — authenticated (desktop) */}
+          {user && (
+            <div className="hidden items-center gap-1 md:flex">
+              <span className="max-w-[120px] truncate px-3 py-2 text-[11px] font-semibold text-[#072f1a]">
+                {profile?.nombre ?? user.email}
+              </span>
+              <button
+                onClick={handleSignOut}
+                className="rounded-full border border-[#121210]/[0.10] px-4 py-2 text-[11px] font-medium text-[#57534E] transition-all duration-200 hover:border-[#121210]/[0.20] hover:text-[#121210] active:scale-95"
+              >
+                Salir
+              </button>
+            </div>
+          )}
+
+          {/* Hamburger button (mobile only) */}
+          <button
+            onClick={() => setMenuOpen((v) => !v)}
+            className="flex h-8 w-8 flex-col items-center justify-center gap-[5px] rounded-full md:hidden"
+            aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'}
+          >
+            <span
+              className={`block h-[1.5px] w-4 origin-center bg-[#072f1a] transition-all duration-300 ${menuOpen ? 'translate-y-[6.5px] rotate-45' : ''}`}
+            />
+            <span
+              className={`block h-[1.5px] w-4 bg-[#072f1a] transition-all duration-300 ${menuOpen ? 'opacity-0' : ''}`}
+            />
+            <span
+              className={`block h-[1.5px] w-4 origin-center bg-[#072f1a] transition-all duration-300 ${menuOpen ? '-translate-y-[6.5px] -rotate-45' : ''}`}
+            />
+          </button>
+        </nav>
+      </div>
+
+      {/* Full-screen mobile menu overlay */}
+      <div
+        className={`fixed inset-0 z-[60] bg-[#F9F9F8]/95 backdrop-blur-2xl transition-all duration-300 ease-out md:hidden ${
+          menuOpen
+            ? 'pointer-events-auto scale-100 opacity-100'
+            : 'pointer-events-none scale-95 opacity-0'
+        }`}
+      >
+        {/* Top bar */}
+        <div className="flex items-center justify-between px-6 pt-7">
+          <div className="flex items-center gap-2">
+            <div className="h-1.5 w-1.5 rounded-full bg-[#12D176]" />
+            <span className="text-xs font-bold tracking-[0.22em] text-[#072f1a] uppercase">
+              Cancha
+            </span>
+          </div>
+          <button
+            onClick={() => setMenuOpen(false)}
+            className="flex h-9 w-9 flex-col items-center justify-center gap-[5px] rounded-full border border-[#121210]/[0.10] bg-white/60"
+            aria-label="Cerrar menú"
+          >
+            <span className="block h-[1.5px] w-4 origin-center translate-y-[6.5px] rotate-45 bg-[#072f1a]" />
+            <span className="block h-[1.5px] w-4 bg-[#072f1a] opacity-0" />
+            <span className="block h-[1.5px] w-4 origin-center -translate-y-[6.5px] -rotate-45 bg-[#072f1a]" />
+          </button>
+        </div>
+
+        {/* Nav links */}
+        <div className="flex h-[calc(100%-160px)] flex-col items-center justify-center gap-9">
           {NAV_LINKS.map((link) => (
             <a
               key={link}
               href={`#${link.toLowerCase()}`}
-              className="rounded-full px-4 py-2 text-[11px] font-medium whitespace-nowrap text-[#57534E] transition-all duration-200 hover:bg-[#121210]/[0.05] hover:text-[#121210]"
+              onClick={() => setMenuOpen(false)}
+              className="text-[2.8rem] font-extrabold tracking-[-0.02em] text-[#072f1a] transition-colors duration-200 hover:text-[#12D176]"
             >
               {link}
             </a>
           ))}
-          <div className="mx-1 h-4 w-px shrink-0 bg-[#121210]/[0.10]" />
         </div>
 
-        {/* CTA */}
-        <button className="rounded-full bg-[#072f1a] px-5 py-2 text-xs font-bold text-[#F2F0EB] transition-all duration-200 hover:scale-105 hover:bg-[#0d4526] active:scale-95">
-          Entrar
-        </button>
-      </nav>
-    </div>
+        {/* Auth */}
+        <div className="absolute right-0 bottom-10 left-0 flex justify-center">
+          {!user && (
+            <Link to="/login" onClick={() => setMenuOpen(false)} className={CLS.btnDark}>
+              Entrar
+            </Link>
+          )}
+          {user && (
+            <div className="flex flex-col items-center gap-3">
+              <span className="text-sm font-semibold text-[#072f1a]">
+                {profile?.nombre ?? user.email}
+              </span>
+              <button onClick={handleSignOut} className={CLS.btnOutline}>
+                Salir
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </>
   )
 }
 
@@ -91,7 +209,7 @@ function Hero() {
               <span className={CLS.label}>Canchas sintéticas · Booking</span>
             </div>
 
-            <h1 className="text-[clamp(4.5rem,7.5vw,8rem)] leading-[0.86] tracking-[-0.03em]">
+            <h1 className="text-[clamp(3rem,7.5vw,8rem)] leading-[0.86] tracking-[-0.03em]">
               <span className="block font-extrabold text-[#121210]">Reserva.</span>
               <span className="text-outline block font-extrabold">Reta.</span>
               <span className="block font-extrabold text-[#0C6E3C]">Juega.</span>
@@ -123,7 +241,7 @@ function Hero() {
             <img
               src="https://picsum.photos/seed/grassfield/900/720"
               alt="Cancha sintética"
-              className="h-[580px] w-full object-cover"
+              className="h-[280px] w-full object-cover sm:h-[420px] lg:h-[580px]"
               style={{ filter: 'sepia(5%) brightness(0.82) contrast(1.1) saturate(0.9)' }}
             />
             <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#072f1a]/60" />

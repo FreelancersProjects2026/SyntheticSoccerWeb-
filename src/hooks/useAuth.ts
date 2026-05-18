@@ -1,1 +1,1 @@
-// TODO: useAuth hook
+export { useAuth } from '@/context/AuthContext'

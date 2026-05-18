@@ -1,6 +1,6 @@
 // ─── NAVIGATION ───────────────────────────────────────────────────────────────
 
-export const NAV_LINKS = ['Canchas', 'Reservar', 'Retos', 'Admin'] as const
+export const NAV_LINKS = ['Canchas', 'Reservar', 'Retos'] as const
 
 // ─── HERO ─────────────────────────────────────────────────────────────────────
 
