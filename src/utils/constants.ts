@@ -13,8 +13,14 @@ export const HERO_STATS = [
 // ─── MARQUEE ──────────────────────────────────────────────────────────────────
 
 export const MARQUEE_ITEMS = [
-  'RESERVA', 'RETA', 'JUEGA', 'CANCHAS SINTÉTICAS',
-  'FÚTBOL 5 · 7 · 11', 'BOOKING INSTANTÁNEO', 'RETOS EN VIVO', 'GESTIONA TUS TURNOS',
+  'RESERVA',
+  'RETA',
+  'JUEGA',
+  'CANCHAS SINTÉTICAS',
+  'FÚTBOL 5 · 7 · 11',
+  'BOOKING INSTANTÁNEO',
+  'RETOS EN VIVO',
+  'GESTIONA TUS TURNOS',
 ] as const
 
 // ─── FEATURES BENTO ───────────────────────────────────────────────────────────
@@ -104,38 +110,48 @@ export const FOOTER_LINKS = ['Canchas', 'Reservar', 'Retos', 'Administración', 
 // ─── UI STYLES ────────────────────────────────────────────────────────────────
 
 export const CLS = {
-  label:      'text-[11px] font-medium tracking-[0.3em] text-[#0C6E3C] uppercase',
-  btnDark:    'rounded-full bg-[#072f1a] px-7 py-3.5 text-sm font-bold text-[#F2F0EB] transition-all hover:scale-105 hover:bg-[#171715] active:scale-95',
-  btnOutline: 'rounded-full border border-[#121210]/15 px-7 py-3.5 text-sm font-medium text-[#57534E] transition-all hover:border-[#121210]/30 hover:text-[#121210]',
-  btnGhost:   'rounded-full border border-white/10 px-7 py-3.5 text-sm font-medium text-[#7A9480] transition-all hover:border-[#12D176]/30 hover:text-[#12D176]',
+  label: 'text-[11px] font-medium tracking-[0.3em] text-[#0C6E3C] uppercase',
+  btnDark:
+    'rounded-full bg-[#072f1a] px-7 py-3.5 text-sm font-bold text-[#F2F0EB] transition-all hover:scale-105 hover:bg-[#171715] active:scale-95',
+  btnOutline:
+    'rounded-full border border-[#121210]/15 px-7 py-3.5 text-sm font-medium text-[#57534E] transition-all hover:border-[#121210]/30 hover:text-[#121210]',
+  btnGhost:
+    'rounded-full border border-white/10 px-7 py-3.5 text-sm font-medium text-[#7A9480] transition-all hover:border-[#12D176]/30 hover:text-[#12D176]',
 }
 
 export const CARD_STYLES = {
   dark: {
-    wrapper:    'bg-[#072f1a] border-white/[0.05]',
-    gradient:   'from-transparent to-[#072f1a]/90',
+    wrapper: 'bg-[#072f1a] border-white/[0.05]',
+    gradient: 'from-transparent to-[#072f1a]/90',
     imgOpacity: 0.15,
-    imgFilter:  'grayscale(60%) contrast(1.1)',
-    title:      'text-[#F2F0EB]',
-    desc:       'text-[#7A9480]',
+    imgFilter: 'grayscale(60%) contrast(1.1)',
+    title: 'text-[#F2F0EB]',
+    desc: 'text-[#7A9480]',
   },
   lime: {
-    wrapper:    'bg-[#D8F5E8] border-[#0A9952]/20',
-    gradient:   'from-transparent to-[#D8F5E8]/90',
+    wrapper: 'bg-[#D8F5E8] border-[#0A9952]/20',
+    gradient: 'from-transparent to-[#D8F5E8]/90',
     imgOpacity: 0.12,
-    imgFilter:  'sepia(10%) contrast(1.05) saturate(0.8)',
-    title:      'text-[#121210]',
-    desc:       'text-[#57534E]',
+    imgFilter: 'sepia(10%) contrast(1.05) saturate(0.8)',
+    title: 'text-[#121210]',
+    desc: 'text-[#57534E]',
   },
   light: {
-    wrapper:    'bg-[#F2F1EE] border-[#121210]/[0.06]',
-    gradient:   'from-transparent to-[#F2F1EE]/90',
+    wrapper: 'bg-[#F2F1EE] border-[#121210]/[0.06]',
+    gradient: 'from-transparent to-[#F2F1EE]/90',
     imgOpacity: 0.12,
-    imgFilter:  'sepia(10%) contrast(1.05) saturate(0.8)',
-    title:      'text-[#121210]',
-    desc:       'text-[#57534E]',
+    imgFilter: 'sepia(10%) contrast(1.05) saturate(0.8)',
+    title: 'text-[#121210]',
+    desc: 'text-[#57534E]',
   },
-} satisfies Record<FeatureVariant, {
-  wrapper: string; gradient: string; imgOpacity: number
-  imgFilter: string; title: string; desc: string
-}>
+} satisfies Record<
+  FeatureVariant,
+  {
+    wrapper: string
+    gradient: string
+    imgOpacity: number
+    imgFilter: string
+    title: string
+    desc: string
+  }
+>

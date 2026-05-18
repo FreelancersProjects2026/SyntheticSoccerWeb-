@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react'
 import {
-  NAV_LINKS, HERO_STATS, MARQUEE_ITEMS,
-  FEATURES, STEPS, RETO_CHALLENGES, FOOTER_LINKS,
-  CLS, CARD_STYLES,
+  NAV_LINKS,
+  HERO_STATS,
+  MARQUEE_ITEMS,
+  FEATURES,
+  STEPS,
+  RETO_CHALLENGES,
+  FOOTER_LINKS,
+  CLS,
+  CARD_STYLES,
 } from '@/utils/constants'
-import {
-  useParallaxScroll,
-  useWordScrub,
-  useStaggerEntrance,
-} from '@/hooks/useScrollAnimations'
+import { useParallaxScroll, useWordScrub, useStaggerEntrance } from '@/hooks/useScrollAnimations'
 
 // ─── COMPONENTS ───────────────────────────────────────────────────────────────
 
@@ -25,7 +27,7 @@ function Nav() {
   const expanded = !scrolled || hovered
 
   return (
-    <div className="pointer-events-none fixed left-0 right-0 top-5 z-50 flex justify-center">
+    <div className="pointer-events-none fixed top-5 right-0 left-0 z-50 flex justify-center">
       <nav
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
@@ -46,7 +48,7 @@ function Nav() {
         {/* Links — collapse on scroll, re-expand on hover */}
         <div
           className={`hidden items-center overflow-hidden transition-all duration-500 ease-in-out md:flex ${
-            expanded ? 'max-w-[440px] opacity-100' : 'max-w-0 opacity-0 pointer-events-none'
+            expanded ? 'max-w-[440px] opacity-100' : 'pointer-events-none max-w-0 opacity-0'
           }`}
         >
           <div className="mx-1 h-4 w-px shrink-0 bg-[#121210]/[0.10]" />
@@ -54,7 +56,7 @@ function Nav() {
             <a
               key={link}
               href={`#${link.toLowerCase()}`}
-              className="whitespace-nowrap rounded-full px-4 py-2 text-[11px] font-medium text-[#57534E] transition-all duration-200 hover:bg-[#121210]/[0.05] hover:text-[#121210]"
+              className="rounded-full px-4 py-2 text-[11px] font-medium whitespace-nowrap text-[#57534E] transition-all duration-200 hover:bg-[#121210]/[0.05] hover:text-[#121210]"
             >
               {link}
             </a>
@@ -63,7 +65,7 @@ function Nav() {
         </div>
 
         {/* CTA */}
-        <button className="rounded-full bg-[#072f1a] px-5 py-2 text-xs font-bold text-[#F2F0EB] transition-all duration-200 hover:bg-[#0d4526] hover:scale-105 active:scale-95">
+        <button className="rounded-full bg-[#072f1a] px-5 py-2 text-xs font-bold text-[#F2F0EB] transition-all duration-200 hover:scale-105 hover:bg-[#0d4526] active:scale-95">
           Entrar
         </button>
       </nav>
@@ -75,12 +77,14 @@ function Hero() {
   const { sectionRef, targetRef } = useParallaxScroll()
 
   return (
-    <section ref={sectionRef} className="relative flex min-h-screen items-center overflow-hidden bg-[#F9F9F8] pt-20">
-      <div className="pointer-events-none absolute right-0 top-0 h-[600px] w-[600px] translate-x-1/4 -translate-y-1/4 rounded-full bg-[#12D176]/[0.05] blur-[120px]" />
+    <section
+      ref={sectionRef}
+      className="relative flex min-h-screen items-center overflow-hidden bg-[#F9F9F8] pt-20"
+    >
+      <div className="pointer-events-none absolute top-0 right-0 h-[600px] w-[600px] translate-x-1/4 -translate-y-1/4 rounded-full bg-[#12D176]/[0.05] blur-[120px]" />
 
       <div className="relative z-10 mx-auto w-full max-w-7xl px-6 py-16 lg:px-12">
         <div className="grid items-center gap-12 lg:grid-cols-[1fr_1.1fr] lg:gap-10">
-
           <div className="flex flex-col gap-8">
             <div className="flex items-center gap-3">
               <div className="h-px w-8 bg-[#12D176]" />
@@ -89,7 +93,7 @@ function Hero() {
 
             <h1 className="text-[clamp(4.5rem,7.5vw,8rem)] leading-[0.86] tracking-[-0.03em]">
               <span className="block font-extrabold text-[#121210]">Reserva.</span>
-              <span className="block font-extrabold text-outline">Reta.</span>
+              <span className="text-outline block font-extrabold">Reta.</span>
               <span className="block font-extrabold text-[#0C6E3C]">Juega.</span>
             </h1>
 
@@ -124,25 +128,34 @@ function Hero() {
             />
             <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#072f1a]/60" />
 
-            <div className="absolute bottom-5 left-5 right-5">
+            <div className="absolute right-5 bottom-5 left-5">
               <div className="flex items-center justify-between rounded-2xl bg-[#F9F9F8]/92 px-5 py-4 backdrop-blur-md">
                 <div>
                   <p className="text-sm font-semibold text-[#121210]">Disponible ahora mismo</p>
                   <p className="text-xs text-[#57534E]">Fútbol 5 · Cancha norte · 20:00</p>
                 </div>
                 <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#072f1a]">
-                  <svg className="h-4 w-4 text-[#12D176]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  <svg
+                    className="h-4 w-4 text-[#12D176]"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2.5}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M13 7l5 5m0 0l-5 5m5-5H6"
+                    />
                   </svg>
                 </div>
               </div>
             </div>
 
-            <div className="absolute right-5 top-5 rounded-xl bg-[#12D176] px-3.5 py-1.5 text-xs font-bold text-[#072f1a]">
+            <div className="absolute top-5 right-5 rounded-xl bg-[#12D176] px-3.5 py-1.5 text-xs font-bold text-[#072f1a]">
               En vivo
             </div>
           </div>
-
         </div>
       </div>
     </section>
@@ -153,9 +166,12 @@ function MarqueeStrip() {
   const doubled = [...MARQUEE_ITEMS, ...MARQUEE_ITEMS]
   return (
     <div className="relative overflow-hidden border-y border-[#121210]/[0.06] bg-[#F9F9F8] py-4">
-      <div className="flex animate-marquee gap-12 whitespace-nowrap">
+      <div className="animate-marquee flex gap-12 whitespace-nowrap">
         {doubled.map((item, i) => (
-          <span key={i} className="text-[11px] font-semibold tracking-[0.25em] text-[#121210]/30 uppercase">
+          <span
+            key={i}
+            className="text-[11px] font-semibold tracking-[0.25em] text-[#121210]/30 uppercase"
+          >
             {item}
             <span className="mx-8 text-[#12D176] opacity-70">·</span>
           </span>
@@ -169,16 +185,27 @@ function Features() {
   const { containerRef, titleRef } = useWordScrub()
 
   return (
-    <section ref={containerRef} id="canchas" className="mx-auto w-full max-w-7xl px-6 py-32 lg:px-12 lg:py-48">
+    <section
+      ref={containerRef}
+      id="canchas"
+      className="mx-auto w-full max-w-7xl px-6 py-32 lg:px-12 lg:py-48"
+    >
       <div className="mb-16 space-y-5">
         <p className={CLS.label}>Todo lo que necesitas</p>
-        <h2 ref={titleRef} className="max-w-4xl text-[clamp(2.5rem,4.5vw,5rem)] leading-[0.9] tracking-tight text-[#121210]">
+        <h2
+          ref={titleRef}
+          className="max-w-4xl text-[clamp(2.5rem,4.5vw,5rem)] leading-[0.9] tracking-tight text-[#121210]"
+        >
           {'Una plataforma.'.split(' ').map((w, i) => (
-            <span key={`a${i}`} className="mr-[0.25em] font-extrabold">{w}</span>
+            <span key={`a${i}`} className="mr-[0.25em] font-extrabold">
+              {w}
+            </span>
           ))}
           <br />
           {'Todas las herramientas.'.split(' ').map((w, i) => (
-            <span key={`b${i}`} className="mr-[0.25em] font-extrabold">{w}</span>
+            <span key={`b${i}`} className="mr-[0.25em] font-extrabold">
+              {w}
+            </span>
           ))}
         </h2>
       </div>
@@ -187,7 +214,10 @@ function Features() {
         {FEATURES.map((f, i) => {
           const s = CARD_STYLES[f.variant]
           return (
-            <div key={i} className={`group relative overflow-hidden rounded-3xl border transition-all duration-500 ${s.wrapper} ${f.span}`}>
+            <div
+              key={i}
+              className={`group relative overflow-hidden rounded-3xl border transition-all duration-500 ${s.wrapper} ${f.span}`}
+            >
               {f.image && (
                 <img
                   src={f.image}
@@ -217,10 +247,17 @@ function HowItWorks() {
       <div className="mx-auto w-full max-w-7xl px-6 lg:px-12">
         <div className="mb-20 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="mb-4 text-[11px] font-medium tracking-[0.3em] text-[#12D176] uppercase">Proceso</p>
+            <p className="mb-4 text-[11px] font-medium tracking-[0.3em] text-[#12D176] uppercase">
+              Proceso
+            </p>
             <h2 className="text-[clamp(2.5rem,4.5vw,5rem)] leading-[0.9] tracking-tight">
               <span className="block font-extrabold text-[#F2F0EB]">Tres pasos.</span>
-              <span className="block font-extrabold" style={{ WebkitTextStroke: '1.5px #F2F0EB', color: 'transparent' }}>Sin complicaciones.</span>
+              <span
+                className="block font-extrabold"
+                style={{ WebkitTextStroke: '1.5px #F2F0EB', color: 'transparent' }}
+              >
+                Sin complicaciones.
+              </span>
             </h2>
           </div>
           <button className={CLS.btnGhost}>Empezar →</button>
@@ -228,9 +265,14 @@ function HowItWorks() {
 
         <div className="grid gap-3 lg:grid-cols-3">
           {STEPS.map((step, i) => (
-            <div key={i} className="step-card group rounded-3xl border border-white/[0.06] bg-[#171715] p-8 transition-all duration-500 hover:border-white/10 hover:bg-[#1E1E1C]">
+            <div
+              key={i}
+              className="step-card group rounded-3xl border border-white/[0.06] bg-[#171715] p-8 transition-all duration-500 hover:border-white/10 hover:bg-[#1E1E1C]"
+            >
               <div className="mb-10 flex items-center justify-between">
-                <span className="select-none text-[4rem] font-black leading-none text-white/[0.04]">{step.n}</span>
+                <span className="text-[4rem] leading-none font-black text-white/[0.04] select-none">
+                  {step.n}
+                </span>
                 <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#12D176]/10 ring-1 ring-[#12D176]/20 transition-all group-hover:bg-[#12D176]/15 group-hover:ring-[#12D176]/30">
                   <div className="h-2 w-2 rounded-full bg-[#12D176]" />
                 </div>
@@ -257,7 +299,8 @@ function RetosSection() {
               <span className="block font-extrabold text-[#0C6E3C]">Reta a alguien.</span>
             </h2>
             <p className="max-w-sm text-[15px] leading-relaxed text-[#57534E]">
-              Publica un reto en cualquier slot disponible. Otros equipos lo ven, aceptan y el partido queda listo.
+              Publica un reto en cualquier slot disponible. Otros equipos lo ven, aceptan y el
+              partido queda listo.
             </p>
             <div className="flex flex-wrap gap-3">
               <button className={CLS.btnDark}>Publicar reto</button>
@@ -273,13 +316,18 @@ function RetosSection() {
               style={{ filter: 'sepia(5%) brightness(0.65) contrast(1.1)' }}
             />
             <div className="absolute inset-0 bg-gradient-to-r from-[#F2F1EE]/40 to-transparent" />
-            <div className="absolute left-6 top-6 space-y-2">
+            <div className="absolute top-6 left-6 space-y-2">
               {RETO_CHALLENGES.map((reto, i) => (
-                <div key={i} className="flex items-center gap-3 rounded-xl border border-white/10 bg-[#F9F9F8]/92 px-4 py-3 backdrop-blur-sm">
+                <div
+                  key={i}
+                  className="flex items-center gap-3 rounded-xl border border-white/10 bg-[#F9F9F8]/92 px-4 py-3 backdrop-blur-sm"
+                >
                   <div className="h-2 w-2 rounded-full bg-[#12D176]" />
                   <div>
                     <p className="text-xs font-semibold text-[#121210]">{reto.team}</p>
-                    <p className="text-[10px] text-[#57534E]">{reto.time} · {reto.status}</p>
+                    <p className="text-[10px] text-[#57534E]">
+                      {reto.time} · {reto.status}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -298,10 +346,17 @@ function CTASection() {
         <div className="h-[600px] w-[600px] rounded-full bg-[#12D176]/[0.05] blur-[130px]" />
       </div>
       <div className="relative z-10 mx-auto max-w-4xl px-6 text-center lg:px-12">
-        <p className="mb-5 text-[11px] font-medium tracking-[0.3em] text-[#12D176] uppercase">Empieza hoy</p>
+        <p className="mb-5 text-[11px] font-medium tracking-[0.3em] text-[#12D176] uppercase">
+          Empieza hoy
+        </p>
         <h2 className="mb-8 text-[clamp(3.5rem,7vw,8rem)] leading-[0.86] tracking-[-0.03em]">
           <span className="block font-extrabold text-[#F2F0EB]">Tu cancha</span>
-          <span className="block font-extrabold" style={{ WebkitTextStroke: '1.5px #F2F0EB', color: 'transparent' }}>te espera.</span>
+          <span
+            className="block font-extrabold"
+            style={{ WebkitTextStroke: '1.5px #F2F0EB', color: 'transparent' }}
+          >
+            te espera.
+          </span>
         </h2>
         <p className="mx-auto mb-10 max-w-xs text-[15px] leading-relaxed text-[#5E8268]">
           Sin filas, sin llamadas. Reserva en menos de dos minutos desde cualquier dispositivo.
@@ -319,12 +374,18 @@ function Footer() {
     <footer className="border-t border-[#121210]/[0.07] bg-[#F9F9F8] py-12">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-6 lg:flex-row lg:items-center lg:justify-between lg:px-12">
         <div>
-          <span className="text-sm font-bold tracking-[0.18em] text-[#072f1a] uppercase">Cancha</span>
+          <span className="text-sm font-bold tracking-[0.18em] text-[#072f1a] uppercase">
+            Cancha
+          </span>
           <p className="mt-1 text-xs text-[#9C9790]">Booking para canchas sintéticas</p>
         </div>
         <div className="flex flex-wrap gap-6">
           {FOOTER_LINKS.map((link) => (
-            <a key={link} href="#" className="text-xs text-[#9C9790] transition-colors hover:text-[#57534E]">
+            <a
+              key={link}
+              href="#"
+              className="text-xs text-[#9C9790] transition-colors hover:text-[#57534E]"
+            >
               {link}
             </a>
           ))}

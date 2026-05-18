@@ -23,7 +23,7 @@ export function useParallaxScroll() {
             end: 'bottom top',
             scrub: 2,
           },
-        }
+        },
       )
     }, sectionRef)
     return () => ctx.revert()
@@ -40,15 +40,19 @@ export function useWordScrub() {
     const ctx = gsap.context(() => {
       if (!titleRef.current) return
       titleRef.current.querySelectorAll('span').forEach((word) => {
-        gsap.fromTo(word, { opacity: 0.12 }, {
-          opacity: 1,
-          scrollTrigger: {
-            trigger: titleRef.current,
-            start: 'top 80%',
-            end: 'top 15%',
-            scrub: 1.5,
+        gsap.fromTo(
+          word,
+          { opacity: 0.12 },
+          {
+            opacity: 1,
+            scrollTrigger: {
+              trigger: titleRef.current,
+              start: 'top 80%',
+              end: 'top 15%',
+              scrub: 1.5,
+            },
           },
-        })
+        )
       })
     }, containerRef)
     return () => ctx.revert()
@@ -63,18 +67,22 @@ export function useStaggerEntrance(selector: string) {
   useEffect(() => {
     const ctx = gsap.context(() => {
       containerRef.current?.querySelectorAll(selector).forEach((item, i) => {
-        gsap.fromTo(item, { y: 60, opacity: 0 }, {
-          y: 0,
-          opacity: 1,
-          duration: 0.9,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: item,
-            start: 'top 87%',
-            toggleActions: 'play none none reverse',
+        gsap.fromTo(
+          item,
+          { y: 60, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.9,
+            ease: 'power3.out',
+            scrollTrigger: {
+              trigger: item,
+              start: 'top 87%',
+              toggleActions: 'play none none reverse',
+            },
+            delay: i * 0.12,
           },
-          delay: i * 0.12,
-        })
+        )
       })
     }, containerRef)
     return () => ctx.revert()
