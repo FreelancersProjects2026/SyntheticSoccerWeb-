@@ -3,7 +3,13 @@ import gsap from 'gsap'
 
 function IconField() {
   return (
-    <svg className="h-[18px] w-[18px]" fill="none" viewBox="0 0 18 18" stroke="currentColor" strokeWidth={1.7}>
+    <svg
+      className="h-[18px] w-[18px]"
+      fill="none"
+      viewBox="0 0 18 18"
+      stroke="currentColor"
+      strokeWidth={1.7}
+    >
       <rect x="1" y="2.5" width="16" height="13" rx="1.5" />
       <line x1="9" y1="2.5" x2="9" y2="15.5" />
       <circle cx="9" cy="9" r="2.2" />
@@ -13,7 +19,13 @@ function IconField() {
 
 function IconCalendar() {
   return (
-    <svg className="h-[18px] w-[18px]" fill="none" viewBox="0 0 18 18" stroke="currentColor" strokeWidth={1.7}>
+    <svg
+      className="h-[18px] w-[18px]"
+      fill="none"
+      viewBox="0 0 18 18"
+      stroke="currentColor"
+      strokeWidth={1.7}
+    >
       <rect x="1.5" y="2.5" width="15" height="14" rx="1.5" />
       <path d="M13 1v3M5 1v3M1.5 8h15" strokeLinecap="round" />
     </svg>
@@ -22,17 +34,32 @@ function IconCalendar() {
 
 function IconUsers() {
   return (
-    <svg className="h-[18px] w-[18px]" fill="none" viewBox="0 0 18 18" stroke="currentColor" strokeWidth={1.7}>
+    <svg
+      className="h-[18px] w-[18px]"
+      fill="none"
+      viewBox="0 0 18 18"
+      stroke="currentColor"
+      strokeWidth={1.7}
+    >
       <path d="M12 16v-1.5A3.5 3.5 0 008.5 11H4A3.5 3.5 0 00.5 14.5V16" strokeLinecap="round" />
       <circle cx="6.5" cy="5.5" r="3.5" />
-      <path d="M17.5 16v-1.5a3.5 3.5 0 00-2.5-3.35M12 2.15a3.5 3.5 0 010 6.7" strokeLinecap="round" />
+      <path
+        d="M17.5 16v-1.5a3.5 3.5 0 00-2.5-3.35M12 2.15a3.5 3.5 0 010 6.7"
+        strokeLinecap="round"
+      />
     </svg>
   )
 }
 
 function IconSwords() {
   return (
-    <svg className="h-[18px] w-[18px]" fill="none" viewBox="0 0 18 18" stroke="currentColor" strokeWidth={1.7}>
+    <svg
+      className="h-[18px] w-[18px]"
+      fill="none"
+      viewBox="0 0 18 18"
+      stroke="currentColor"
+      strokeWidth={1.7}
+    >
       <path
         d="M10.5 12.5L2 4V2h2l8.5 8.5M12 12l3 3M10.5 4.5l2.5-2.5 1.5 1.5-3.5 3.5M4.5 10.5l-2.5 2.5 1.5 1.5 2.5-2.5"
         strokeLinecap="round"
@@ -92,7 +119,7 @@ export default function Dashboard() {
         <p className="mb-1 text-[10px] font-semibold tracking-[0.2em] text-[#12D176] uppercase">
           Panel
         </p>
-        <h1 className="font-display text-[22px] font-bold leading-tight text-[#0d1a12]">
+        <h1 className="font-display text-[22px] leading-tight font-bold text-[#0d1a12]">
           Dashboard
         </h1>
         <p className="mt-1 text-[13px] text-[#9C9790]">Resumen general de actividad</p>
@@ -110,7 +137,7 @@ export default function Dashboard() {
               {stat.icon}
             </div>
             <div>
-              <p className="text-[22px] font-bold leading-none text-[#0d1a12]">{stat.value}</p>
+              <p className="text-[22px] leading-none font-bold text-[#0d1a12]">{stat.value}</p>
               <p className="mt-0.5 text-[11px] text-[#9C9790]">{stat.label}</p>
             </div>
           </div>
@@ -126,7 +153,10 @@ export default function Dashboard() {
         </div>
         <div className="grid grid-cols-4 gap-3 border-b border-[#F2F1EE] px-5 py-2.5">
           {['Evento', 'Cancha', 'Fecha', 'Estado'].map((h) => (
-            <p key={h} className="text-[11px] font-semibold uppercase tracking-[0.04em] text-[#BCBAB5]">
+            <p
+              key={h}
+              className="text-[11px] font-semibold tracking-[0.04em] text-[#BCBAB5] uppercase"
+            >
               {h}
             </p>
           ))}

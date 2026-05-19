@@ -5,7 +5,7 @@ export default function Usuarios() {
         <p className="mb-1 text-[10px] font-semibold tracking-[0.2em] text-[#12D176] uppercase">
           Gestión
         </p>
-        <h1 className="font-display text-[22px] font-bold leading-tight text-[#0d1a12]">
+        <h1 className="font-display text-[22px] leading-tight font-bold text-[#0d1a12]">
           Usuarios
         </h1>
         <p className="mt-1 text-[13px] text-[#9C9790]">
@@ -26,7 +26,7 @@ export default function Usuarios() {
               {['Nombre', 'Teléfono', 'Rol', 'Registrado'].map((h) => (
                 <p
                   key={h}
-                  className="text-[11px] font-semibold uppercase tracking-[0.04em] text-[#BCBAB5]"
+                  className="text-[11px] font-semibold tracking-[0.04em] text-[#BCBAB5] uppercase"
                 >
                   {h}
                 </p>

@@ -6,7 +6,7 @@ export default function Canchas() {
           <p className="mb-1 text-[10px] font-semibold tracking-[0.2em] text-[#12D176] uppercase">
             Gestión
           </p>
-          <h1 className="font-display text-[22px] font-bold leading-tight text-[#0d1a12]">
+          <h1 className="font-display text-[22px] leading-tight font-bold text-[#0d1a12]">
             Canchas
           </h1>
           <p className="mt-1 text-[13px] text-[#9C9790]">
@@ -36,7 +36,10 @@ export default function Canchas() {
         </div>
         <div className="grid grid-cols-4 gap-3 border-b border-[#F2F1EE] px-5 py-2.5">
           {['Nombre', 'Tipo', 'Slots/día', 'Estado'].map((h) => (
-            <p key={h} className="text-[11px] font-semibold uppercase tracking-[0.04em] text-[#BCBAB5]">
+            <p
+              key={h}
+              className="text-[11px] font-semibold tracking-[0.04em] text-[#BCBAB5] uppercase"
+            >
               {h}
             </p>
           ))}
