@@ -8,8 +8,8 @@
   --color-carbon: #171715;
   --color-graphite: #222220;
   --color-emerald: #12d176;
-  --font-sans: 'DM Sans', system-ui, sans-serif;
-  --font-display: 'Syne', system-ui, sans-serif;
+  --font-sans: 'Barlow', system-ui, sans-serif;
+  --font-display: 'Barlow Condensed', system-ui, sans-serif;
 }
 
 @keyframes marquee {
@@ -35,14 +35,14 @@ body {
   background: #f9f9f8;
   color: #121210;
   overflow-x: hidden;
-  font-family: 'DM Sans', system-ui, sans-serif;
+  font-family: 'Barlow', system-ui, sans-serif;
 }
 
 h1,
 h2,
 h3,
 h4 {
-  font-family: 'Syne', system-ui, sans-serif;
+  font-family: 'Barlow Condensed', system-ui, sans-serif;
 }
 
 ::selection {
