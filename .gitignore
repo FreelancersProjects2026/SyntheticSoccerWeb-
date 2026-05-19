@@ -31,3 +31,6 @@ npm-debug.log*
 Thumbs.db
 
 .vercel
+
+# Brainstorming sessions
+.superpowers/
