@@ -9,6 +9,7 @@ export function useParallaxScroll() {
   const targetRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    if (window.innerWidth < 768) return
     const ctx = gsap.context(() => {
       gsap.fromTo(
         targetRef.current,
@@ -17,7 +18,8 @@ export function useParallaxScroll() {
           scale: 1.04,
           y: -20,
           ease: 'none',
-          force3D: false,
+          force3D: true,
+          willChange: 'transform',
           scrollTrigger: {
             trigger: sectionRef.current,
             start: 'top top',
@@ -38,6 +40,7 @@ export function useWordScrub() {
   const titleRef = useRef<HTMLHeadingElement>(null)
 
   useEffect(() => {
+    if (window.innerWidth < 768) return
     const ctx = gsap.context(() => {
       if (!titleRef.current) return
       titleRef.current.querySelectorAll('span').forEach((word) => {
@@ -46,7 +49,7 @@ export function useWordScrub() {
           { opacity: 0.12 },
           {
             opacity: 1,
-            force3D: false,
+            force3D: true,
             scrollTrigger: {
               trigger: titleRef.current,
               start: 'top 80%',
@@ -67,6 +70,7 @@ export function useStaggerEntrance(selector: string) {
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    if (window.innerWidth < 768) return
     const ctx = gsap.context(() => {
       containerRef.current?.querySelectorAll(selector).forEach((item, i) => {
         gsap.fromTo(
@@ -77,8 +81,8 @@ export function useStaggerEntrance(selector: string) {
             opacity: 1,
             duration: 0.9,
             ease: 'power3.out',
-            force3D: false,
-            roundPixels: true,
+            force3D: true,
+            willChange: 'transform, opacity',
             scrollTrigger: {
               trigger: item,
               start: 'top 87%',

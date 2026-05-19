@@ -199,7 +199,7 @@ function Hero() {
       ref={sectionRef}
       className="relative flex min-h-screen items-center overflow-hidden bg-[#F9F9F8] pt-20"
     >
-      <div className="pointer-events-none absolute top-0 right-0 h-[600px] w-[600px] translate-x-1/4 -translate-y-1/4 rounded-full bg-[#12D176]/[0.05] blur-[120px]" />
+      <div className="pointer-events-none absolute top-0 right-0 h-[600px] w-[600px] translate-x-1/4 -translate-y-1/4 rounded-full bg-[#12D176]/[0.05] blur-[120px]" style={{ contain: 'layout paint' }} />
 
       <div className="relative z-10 mx-auto w-full max-w-7xl px-6 py-16 lg:px-12">
         <div className="grid items-center gap-12 lg:grid-cols-[1fr_1.1fr] lg:gap-10">
@@ -241,6 +241,11 @@ function Hero() {
             <img
               src="https://picsum.photos/seed/grassfield/900/720"
               alt="Cancha sintética"
+              width={900}
+              height={720}
+              loading="eager"
+              fetchPriority="high"
+              decoding="async"
               className="h-[280px] w-full object-cover sm:h-[420px] lg:h-[580px]"
               style={{ filter: 'sepia(5%) brightness(0.82) contrast(1.1) saturate(0.9)' }}
             />
@@ -430,6 +435,10 @@ function RetosSection() {
             <img
               src="https://picsum.photos/seed/match700/700/500"
               alt="Partido en cancha"
+              width={700}
+              height={500}
+              loading="lazy"
+              decoding="async"
               className="h-full w-full object-cover"
               style={{ filter: 'sepia(5%) brightness(0.65) contrast(1.1)' }}
             />
@@ -461,7 +470,7 @@ function CTASection() {
   return (
     <section className="relative overflow-hidden bg-[#072f1a] py-32 lg:py-48">
       <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-        <div className="h-[600px] w-[600px] rounded-full bg-[#12D176]/[0.05] blur-[130px]" />
+        <div className="h-[600px] w-[600px] rounded-full bg-[#12D176]/[0.05] blur-[130px]" style={{ contain: 'layout paint' }} />
       </div>
       <div className="relative z-10 mx-auto max-w-4xl px-6 text-center lg:px-12">
         <p className="mb-5 text-[11px] font-medium tracking-[0.3em] text-[#12D176] uppercase">
