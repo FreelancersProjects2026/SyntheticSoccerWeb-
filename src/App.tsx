@@ -6,6 +6,8 @@ import ProtectedRoute from '@/components/ProtectedRoute'
 const Home = lazy(() => import('@/pages/Home'))
 const Login = lazy(() => import('@/pages/Login'))
 const Register = lazy(() => import('@/pages/Register'))
+const Reservar = lazy(() => import('@/pages/Reservar'))
+const MisReservas = lazy(() => import('@/pages/MisReservas'))
 const AdminLayout = lazy(() => import('@/pages/admin/AdminLayout'))
 const Dashboard = lazy(() => import('@/pages/admin/Dashboard'))
 const Canchas = lazy(() => import('@/pages/admin/Canchas'))
@@ -21,6 +23,22 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route
+              path="/reservar"
+              element={
+                <ProtectedRoute>
+                  <Reservar />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/mis-reservas"
+              element={
+                <ProtectedRoute>
+                  <MisReservas />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/admin"
               element={
