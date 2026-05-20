@@ -11,9 +11,9 @@ const ESTADO_STYLES: Record<string, string> = {
 }
 
 const ESTADO_TICKET: Record<string, { label: string; color: string; dot: string }> = {
-  pendiente:  { label: 'Pendiente de aprobación', color: '#B45309', dot: '#F59E0B' },
-  confirmada: { label: 'Confirmada',              color: '#12D176', dot: '#12D176' },
-  cancelada:  { label: 'Cancelada',               color: '#DC2626', dot: '#DC2626' },
+  pendiente: { label: 'Pendiente de aprobación', color: '#B45309', dot: '#F59E0B' },
+  confirmada: { label: 'Confirmada', color: '#12D176', dot: '#12D176' },
+  cancelada: { label: 'Cancelada', color: '#DC2626', dot: '#DC2626' },
 }
 
 function formatFechaLarga(fecha: string): string {
@@ -26,13 +26,7 @@ function formatFechaLarga(fecha: string): string {
   })
 }
 
-function Comprobante({
-  reserva,
-  onClose,
-}: {
-  reserva: ReservaConDetalles
-  onClose: () => void
-}) {
+function Comprobante({ reserva, onClose }: { reserva: ReservaConDetalles; onClose: () => void }) {
   const est = ESTADO_TICKET[reserva.estado]
 
   return (
@@ -51,7 +45,7 @@ function Comprobante({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top half — dark */}
-        <div className="rounded-t-[28px] bg-[#072f1a] px-7 pb-7 pt-8">
+        <div className="rounded-t-[28px] bg-[#072f1a] px-7 pt-8 pb-7">
           {/* Brand row */}
           <div className="mb-8 flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -65,7 +59,13 @@ function Comprobante({
               className="flex h-7 w-7 items-center justify-center rounded-full bg-white/10 text-[#F2F0EB]/60 transition-colors hover:bg-white/20 hover:text-[#F2F0EB]"
               aria-label="Cerrar"
             >
-              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 14 14" stroke="currentColor" strokeWidth={2}>
+              <svg
+                className="h-3.5 w-3.5"
+                fill="none"
+                viewBox="0 0 14 14"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
                 <path strokeLinecap="round" d="M1 1l12 12M13 1L1 13" />
               </svg>
             </button>
@@ -75,20 +75,14 @@ function Comprobante({
           <p className="font-display text-[11px] font-semibold tracking-[0.2em] text-[#12D176] uppercase">
             Reserva
           </p>
-          <h2 className="font-display mt-1 text-3xl font-extrabold leading-tight text-[#F2F0EB]">
+          <h2 className="font-display mt-1 text-3xl leading-tight font-extrabold text-[#F2F0EB]">
             {reserva.canchas?.nombre ?? '—'}
           </h2>
 
           {/* Estado pill */}
           <div className="mt-5 flex items-center gap-2">
-            <span
-              className="h-2 w-2 rounded-full"
-              style={{ backgroundColor: est.dot }}
-            />
-            <span
-              className="text-[12px] font-semibold"
-              style={{ color: est.color }}
-            >
+            <span className="h-2 w-2 rounded-full" style={{ backgroundColor: est.dot }} />
+            <span className="text-[12px] font-semibold" style={{ color: est.color }}>
               {est.label}
             </span>
           </div>
@@ -105,7 +99,7 @@ function Comprobante({
         </div>
 
         {/* Bottom half — light */}
-        <div className="rounded-b-[28px] bg-white px-7 pb-8 pt-6">
+        <div className="rounded-b-[28px] bg-white px-7 pt-6 pb-8">
           <div className="space-y-5">
             <Row label="Fecha" value={formatFechaLarga(reserva.fecha)} />
             <Row label="Horario" value={`${reserva.slot_inicio.slice(0, 5)} hs`} />
@@ -233,9 +227,7 @@ export default function MisReservas() {
         </div>
       </div>
 
-      {selected && (
-        <Comprobante reserva={selected} onClose={() => setSelected(null)} />
-      )}
+      {selected && <Comprobante reserva={selected} onClose={() => setSelected(null)} />}
     </div>
   )
 }

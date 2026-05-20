@@ -59,26 +59,26 @@ export const FEATURES: Feature[] = [
     desc: 'Elige fecha, horario y tipo de cancha. Confirma en segundos con disponibilidad en tiempo real.',
     image: 'https://picsum.photos/seed/reservation/800/500',
     variant: 'dark',
-    span: 'col-span-2 row-span-1',
+    span: 'h-[200px] col-span-1 md:h-auto md:col-span-2 md:row-span-1',
   },
   {
     title: 'Reta equipos',
     desc: 'Publica un reto, encuentra rivales y acepta partidos. Fútbol competitivo sin complicaciones.',
     image: 'https://picsum.photos/seed/soccer/600/900',
     variant: 'light',
-    span: 'col-span-1 row-span-2',
+    span: 'h-[260px] col-span-1 md:h-auto md:col-span-1 md:row-span-2',
   },
   {
     title: 'Calendario de turnos',
     desc: 'Todos tus turnos en un calendario interactivo. Cancela o reagenda con un toque.',
     variant: 'lime',
-    span: 'col-span-1 row-span-1',
+    span: 'h-[180px] col-span-1 md:h-auto md:col-span-1 md:row-span-1',
   },
   {
     title: 'Panel admin',
     desc: 'Dashboard para administradores: canchas, horarios y reservas desde un solo lugar.',
     variant: 'dark',
-    span: 'col-span-1 row-span-1',
+    span: 'h-[180px] col-span-1 md:h-auto md:col-span-1 md:row-span-1',
   },
 ]
 

@@ -349,10 +349,7 @@ function Features() {
   const { containerRef, titleRef } = useWordScrub()
 
   return (
-    <section
-      ref={containerRef}
-      className="mx-auto w-full max-w-7xl px-6 py-32 lg:px-12 lg:py-48"
-    >
+    <section ref={containerRef} className="mx-auto w-full max-w-7xl px-6 py-32 lg:px-12 lg:py-48">
       <div className="mb-16 space-y-5">
         <p className={CLS.label}>Todo lo que necesitas</p>
         <h2
@@ -373,7 +370,7 @@ function Features() {
         </h2>
       </div>
 
-      <div className="grid grid-flow-dense auto-rows-[290px] grid-cols-3 gap-3">
+      <div className="grid grid-flow-dense grid-cols-1 gap-3 md:auto-rows-[290px] md:grid-cols-3">
         {FEATURES.map((f, i) => {
           const s = CARD_STYLES[f.variant]
           return (
@@ -417,7 +414,7 @@ function CanchasSection() {
     <section id="canchas" className="mx-auto w-full max-w-7xl px-6 py-32 lg:px-12 lg:py-48">
       <div className="mb-16 space-y-5">
         <p className={CLS.label}>Disponibles ahora</p>
-        <h2 className="max-w-4xl text-[clamp(2.5rem,4.5vw,5rem)] font-extrabold leading-[0.9] tracking-tight text-[#121210]">
+        <h2 className="max-w-4xl text-[clamp(2.5rem,4.5vw,5rem)] leading-[0.9] font-extrabold tracking-tight text-[#121210]">
           Nuestras canchas
         </h2>
       </div>
