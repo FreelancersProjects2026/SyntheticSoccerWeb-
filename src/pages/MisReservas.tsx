@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { getMisReservas } from '@/lib/supabase/reservas'
 import type { ReservaConDetalles } from '@/types'
@@ -25,10 +26,16 @@ export default function MisReservas() {
   return (
     <div className="min-h-screen bg-[#F9F9F8] px-6 py-16">
       <div className="mx-auto max-w-2xl">
+        <Link
+          to="/"
+          className="mb-6 inline-block text-sm text-[#9C9790] transition-colors hover:text-[#121210]"
+        >
+          ← Inicio
+        </Link>
         <p className="mb-2 text-[11px] font-semibold tracking-[0.3em] text-[#12D176] uppercase">
           Mi historial
         </p>
-        <h1 className="mb-8 font-display text-4xl font-extrabold text-[#121210]">Mis reservas</h1>
+        <h1 className="font-display mb-8 text-4xl font-extrabold text-[#121210]">Mis reservas</h1>
 
         {loading && (
           <div className="flex items-center gap-3 text-sm text-[#9C9790]">

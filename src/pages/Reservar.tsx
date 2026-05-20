@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { getCanchas } from '@/lib/supabase/canchas'
 import { getSlotsTomados, createReserva } from '@/lib/supabase/reservas'
@@ -130,6 +130,12 @@ export default function Reservar() {
       <div className="mx-auto max-w-3xl">
         {/* Header */}
         <div className="mb-10">
+          <Link
+            to="/"
+            className="mb-6 inline-block text-sm text-[#9C9790] transition-colors hover:text-[#121210]"
+          >
+            ← Inicio
+          </Link>
           <p className="mb-2 text-[11px] font-semibold tracking-[0.3em] text-[#12D176] uppercase">
             Reserva
           </p>
