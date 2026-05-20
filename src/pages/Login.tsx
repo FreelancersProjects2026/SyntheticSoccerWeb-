@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '@/lib/supabase/client'
 
 function translateError(msg: string): string {
@@ -11,6 +11,7 @@ function translateError(msg: string): string {
 
 export default function Login() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -30,7 +31,10 @@ export default function Login() {
         .select('rol')
         .eq('id', data.user.id)
         .single()
-      navigate(profile?.rol === 'admin' ? '/admin' : '/')
+      const params = new URLSearchParams(location.search)
+      const redirect = params.get('redirect')
+      const dest = redirect?.startsWith('/') ? redirect : profile?.rol === 'admin' ? '/admin' : '/'
+      navigate(dest)
     }
     setLoading(false)
   }
