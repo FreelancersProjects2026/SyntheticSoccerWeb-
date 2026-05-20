@@ -71,15 +71,25 @@ function Nav() {
             }`}
           >
             <div className="mx-1 h-4 w-px shrink-0 bg-[#121210]/[0.10]" />
-            {NAV_LINKS.map((link) => (
-              <a
-                key={link}
-                href={`#${link.toLowerCase()}`}
-                className="rounded-full px-4 py-2 text-[11px] font-medium whitespace-nowrap text-[#57534E] transition-all duration-200 hover:bg-[#121210]/[0.05] hover:text-[#121210]"
-              >
-                {link}
-              </a>
-            ))}
+            {NAV_LINKS.map((link) =>
+              link === 'Reservar' ? (
+                <Link
+                  key={link}
+                  to="/reservar"
+                  className="rounded-full px-4 py-2 text-[11px] font-medium whitespace-nowrap text-[#57534E] transition-all duration-200 hover:bg-[#121210]/[0.05] hover:text-[#121210]"
+                >
+                  {link}
+                </Link>
+              ) : (
+                <a
+                  key={link}
+                  href={`#${link.toLowerCase()}`}
+                  className="rounded-full px-4 py-2 text-[11px] font-medium whitespace-nowrap text-[#57534E] transition-all duration-200 hover:bg-[#121210]/[0.05] hover:text-[#121210]"
+                >
+                  {link}
+                </a>
+              ),
+            )}
             <div className="mx-1 h-4 w-px shrink-0 bg-[#121210]/[0.10]" />
           </div>
 
@@ -156,16 +166,27 @@ function Nav() {
 
         {/* Nav links */}
         <div className="flex h-[calc(100%-160px)] flex-col items-center justify-center gap-9">
-          {NAV_LINKS.map((link) => (
-            <a
-              key={link}
-              href={`#${link.toLowerCase()}`}
-              onClick={() => setMenuOpen(false)}
-              className="text-[2.8rem] font-extrabold tracking-[-0.02em] text-[#072f1a] transition-colors duration-200 hover:text-[#12D176]"
-            >
-              {link}
-            </a>
-          ))}
+          {NAV_LINKS.map((link) =>
+            link === 'Reservar' ? (
+              <Link
+                key={link}
+                to="/reservar"
+                onClick={() => setMenuOpen(false)}
+                className="text-[2.8rem] font-extrabold tracking-[-0.02em] text-[#072f1a] transition-colors duration-200 hover:text-[#12D176]"
+              >
+                {link}
+              </Link>
+            ) : (
+              <a
+                key={link}
+                href={`#${link.toLowerCase()}`}
+                onClick={() => setMenuOpen(false)}
+                className="text-[2.8rem] font-extrabold tracking-[-0.02em] text-[#072f1a] transition-colors duration-200 hover:text-[#12D176]"
+              >
+                {link}
+              </a>
+            ),
+          )}
         </div>
 
         {/* Auth */}
@@ -223,7 +244,7 @@ function Hero() {
             </p>
 
             <div className="flex flex-wrap items-center gap-3">
-              <button className={CLS.btnDark}>Reservar ahora</button>
+              <Link to="/reservar" className={CLS.btnDark}>Reservar ahora</Link>
               <button className={CLS.btnOutline}>Ver canchas →</button>
             </div>
 
@@ -386,7 +407,7 @@ function HowItWorks() {
               </span>
             </h2>
           </div>
-          <button className={CLS.btnGhost}>Empezar →</button>
+          <Link to="/reservar" className={CLS.btnGhost}>Empezar →</Link>
         </div>
 
         <div className="grid gap-3 lg:grid-cols-3">
