@@ -10,6 +10,8 @@ const ESTADO_STYLES: Record<string, string> = {
   cancelada: 'bg-red-50 text-red-600 border border-red-200',
 }
 
+const BARCODE_OPACITIES = Array.from({ length: 42 }, () => (Math.random() > 0.5 ? 0.85 : 0.15))
+
 const ESTADO_TICKET: Record<string, { label: string; color: string; dot: string }> = {
   pendiente: { label: 'Pendiente de aprobación', color: '#B45309', dot: '#F59E0B' },
   confirmada: { label: 'Confirmada', color: '#12D176', dot: '#12D176' },
@@ -113,7 +115,7 @@ function Comprobante({ reserva, onClose }: { reserva: ReservaConDetalles; onClos
                 <div
                   key={i}
                   className="flex-1 rounded-sm bg-[#0d1a12]"
-                  style={{ opacity: Math.random() > 0.5 ? 0.85 : 0.15 }}
+                  style={{ opacity: BARCODE_OPACITIES[i] }}
                 />
               ))}
             </div>
