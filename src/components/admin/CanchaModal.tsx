@@ -35,7 +35,6 @@ export default function CanchaModal({ open, cancha, onClose, onSave }: Props) {
 
   useEffect(() => {
     if (!open) return
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setForm(
       cancha
         ? {
