@@ -53,16 +53,24 @@ export default function CanchaModal({ open, cancha, onClose, onSave }: Props) {
     setError(null)
   }, [open, cancha])
 
+  useEffect(() => {
+    return () => {
+      if (imagePreview?.startsWith('blob:')) URL.revokeObjectURL(imagePreview)
+    }
+  }, [imagePreview])
+
   if (!open) return null
 
   function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
+    if (imagePreview?.startsWith('blob:')) URL.revokeObjectURL(imagePreview)
     setImageFile(file)
     setImagePreview(URL.createObjectURL(file))
   }
 
   function clearImage() {
+    if (imagePreview?.startsWith('blob:')) URL.revokeObjectURL(imagePreview)
     setImageFile(null)
     setImagePreview(null)
     setForm((f) => ({ ...f, imagen_url: null }))
