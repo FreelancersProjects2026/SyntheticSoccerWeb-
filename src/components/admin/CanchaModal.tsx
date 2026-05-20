@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, type FormEvent, type ChangeEvent } from 'react'
 import type { Cancha } from '@/types'
 import { uploadCanchaImage } from '@/lib/supabase/canchas'
+import { CANCHA_TIPOS } from '@/utils/constants'
 
 type Props = {
   open: boolean
@@ -8,12 +9,6 @@ type Props = {
   onClose: () => void
   onSave: (values: Omit<Cancha, 'id' | 'created_at'>) => Promise<void>
 }
-
-const TIPOS = [
-  { value: 'futbol5', label: 'Fútbol 5' },
-  { value: 'futbol7', label: 'Fútbol 7' },
-  { value: 'futbol11', label: 'Fútbol 11' },
-] as const
 
 const EMPTY: Omit<Cancha, 'id' | 'created_at'> = {
   nombre: '',
@@ -104,7 +99,13 @@ export default function CanchaModal({ open, cancha, onClose, onSave }: Props) {
             onClick={onClose}
             className="flex h-7 w-7 items-center justify-center rounded-md text-[#BCBAB5] hover:bg-[#F5F4F1] hover:text-[#6B6862]"
           >
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 16 16" stroke="currentColor" strokeWidth={1.8}>
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              viewBox="0 0 16 16"
+              stroke="currentColor"
+              strokeWidth={1.8}
+            >
               <path d="M4 12L12 4M4 4l8 8" strokeLinecap="round" />
             </svg>
           </button>
@@ -122,7 +123,7 @@ export default function CanchaModal({ open, cancha, onClose, onSave }: Props) {
               value={form.nombre}
               onChange={(e) => setForm((f) => ({ ...f, nombre: e.target.value }))}
               placeholder="Cancha Norte"
-              className="h-[38px] w-full rounded-[8px] border border-[#EBEBEA] px-3 text-[13px] text-[#0d1a12] placeholder-[#BCBAB5] outline-none transition-colors focus:border-[#12D176] focus:ring-2 focus:ring-[#12D176]/10"
+              className="h-[38px] w-full rounded-[8px] border border-[#EBEBEA] px-3 text-[13px] text-[#0d1a12] placeholder-[#BCBAB5] transition-colors outline-none focus:border-[#12D176] focus:ring-2 focus:ring-[#12D176]/10"
             />
           </div>
 
@@ -134,9 +135,9 @@ export default function CanchaModal({ open, cancha, onClose, onSave }: Props) {
             <select
               value={form.tipo}
               onChange={(e) => setForm((f) => ({ ...f, tipo: e.target.value as Cancha['tipo'] }))}
-              className="h-[38px] w-full rounded-[8px] border border-[#EBEBEA] px-3 text-[13px] text-[#0d1a12] outline-none transition-colors focus:border-[#12D176] focus:ring-2 focus:ring-[#12D176]/10"
+              className="h-[38px] w-full rounded-[8px] border border-[#EBEBEA] px-3 text-[13px] text-[#0d1a12] transition-colors outline-none focus:border-[#12D176] focus:ring-2 focus:ring-[#12D176]/10"
             >
-              {TIPOS.map((t) => (
+              {CANCHA_TIPOS.map((t) => (
                 <option key={t.value} value={t.value}>
                   {t.label}
                 </option>
@@ -155,12 +156,12 @@ export default function CanchaModal({ open, cancha, onClose, onSave }: Props) {
                 min={1}
                 value={form.slots_por_dia}
                 onChange={(e) => setForm((f) => ({ ...f, slots_por_dia: Number(e.target.value) }))}
-                className="h-[38px] w-full rounded-[8px] border border-[#EBEBEA] px-3 text-[13px] text-[#0d1a12] outline-none transition-colors focus:border-[#12D176] focus:ring-2 focus:ring-[#12D176]/10"
+                className="h-[38px] w-full rounded-[8px] border border-[#EBEBEA] px-3 text-[13px] text-[#0d1a12] transition-colors outline-none focus:border-[#12D176] focus:ring-2 focus:ring-[#12D176]/10"
               />
             </div>
             <div>
               <label className="mb-1.5 block text-[12px] font-semibold text-[#0d1a12]">
-                Precio/slot <span className="text-red-500">*</span>
+                Precio total <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <span className="absolute top-1/2 left-3 -translate-y-1/2 text-[13px] text-[#9C9790]">
@@ -170,38 +171,38 @@ export default function CanchaModal({ open, cancha, onClose, onSave }: Props) {
                   type="number"
                   min={0}
                   step={500}
-                  value={form.precio_por_slot}
+                  value={form.precio_por_slot === 0 ? '' : form.precio_por_slot}
                   onChange={(e) =>
-                    setForm((f) => ({ ...f, precio_por_slot: Number(e.target.value) }))
+                    setForm((f) => ({
+                      ...f,
+                      precio_por_slot: e.target.value === '' ? 0 : Number(e.target.value),
+                    }))
                   }
-                  className="h-[38px] w-full rounded-[8px] border border-[#EBEBEA] pl-7 pr-3 text-[13px] text-[#0d1a12] outline-none transition-colors focus:border-[#12D176] focus:ring-2 focus:ring-[#12D176]/10"
+                  className="h-[38px] w-full rounded-[8px] border border-[#EBEBEA] pr-3 pl-7 text-[13px] text-[#0d1a12] transition-colors outline-none focus:border-[#12D176] focus:ring-2 focus:ring-[#12D176]/10"
                 />
               </div>
+              <p className="mt-1 text-[11px] text-[#9C9790]">Se divide entre los 2 equipos</p>
             </div>
           </div>
 
           {/* Descripción */}
           <div>
             <label className="mb-1.5 block text-[12px] font-semibold text-[#0d1a12]">
-              Descripción{' '}
-              <span className="text-[11px] font-normal text-[#9C9790]">(opcional)</span>
+              Descripción <span className="text-[11px] font-normal text-[#9C9790]">(opcional)</span>
             </label>
             <textarea
               rows={2}
               value={form.descripcion ?? ''}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, descripcion: e.target.value || null }))
-              }
+              onChange={(e) => setForm((f) => ({ ...f, descripcion: e.target.value || null }))}
               placeholder="Cancha con iluminación LED, vestidores..."
-              className="w-full resize-none rounded-[8px] border border-[#EBEBEA] px-3 py-2.5 text-[13px] text-[#0d1a12] placeholder-[#BCBAB5] outline-none transition-colors focus:border-[#12D176] focus:ring-2 focus:ring-[#12D176]/10"
+              className="w-full resize-none rounded-[8px] border border-[#EBEBEA] px-3 py-2.5 text-[13px] text-[#0d1a12] placeholder-[#BCBAB5] transition-colors outline-none focus:border-[#12D176] focus:ring-2 focus:ring-[#12D176]/10"
             />
           </div>
 
           {/* Imagen */}
           <div>
             <label className="mb-1.5 block text-[12px] font-semibold text-[#0d1a12]">
-              Imagen{' '}
-              <span className="text-[11px] font-normal text-[#9C9790]">(opcional)</span>
+              Imagen <span className="text-[11px] font-normal text-[#9C9790]">(opcional)</span>
             </label>
             {imagePreview ? (
               <div className="relative">
@@ -215,7 +216,13 @@ export default function CanchaModal({ open, cancha, onClose, onSave }: Props) {
                   onClick={clearImage}
                   className="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-white/90 text-[#6B6862] shadow hover:text-red-500"
                 >
-                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 16 16" stroke="currentColor" strokeWidth={2}>
+                  <svg
+                    className="h-3.5 w-3.5"
+                    fill="none"
+                    viewBox="0 0 16 16"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
                     <path d="M4 12L12 4M4 4l8 8" strokeLinecap="round" />
                   </svg>
                 </button>

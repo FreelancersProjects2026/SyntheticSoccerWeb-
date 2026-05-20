@@ -1,7 +1,7 @@
 export type Cancha = {
   id: string
   nombre: string
-  tipo: 'futbol5' | 'futbol7' | 'futbol11'
+  tipo: 'futbol5' | 'futbol6' | 'futbol7' | 'futbol11'
   slots_por_dia: number
   precio_por_slot: number
   estado: 'activa' | 'inactiva'

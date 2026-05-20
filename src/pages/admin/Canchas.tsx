@@ -3,14 +3,9 @@ import type { Cancha } from '@/types'
 import { getCanchas, createCancha, updateCancha } from '@/lib/supabase/canchas'
 import CanchaModal from '@/components/admin/CanchaModal'
 import ConfirmDialog from '@/components/admin/ConfirmDialog'
+import { CANCHA_TIPO_LABEL } from '@/utils/constants'
 
 type Toast = { msg: string; type: 'success' | 'error' }
-
-const TIPO_LABELS: Record<Cancha['tipo'], string> = {
-  futbol5: 'Fútbol 5',
-  futbol7: 'Fútbol 7',
-  futbol11: 'Fútbol 11',
-}
 
 export default function Canchas() {
   const [canchas, setCanchas] = useState<Cancha[]>([])
@@ -120,8 +115,8 @@ export default function Canchas() {
           </span>
         </div>
 
-        {/* Column headers */}
-        <div className="grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-3 border-b border-[#F2F1EE] px-5 py-2.5">
+        {/* Column headers — desktop only */}
+        <div className="hidden gap-3 border-b border-[#F2F1EE] px-5 py-2.5 sm:grid sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_160px]">
           {['Nombre', 'Tipo', 'Slots/día', 'Estado', ''].map((h, i) => (
             <p
               key={i}
@@ -158,46 +153,30 @@ export default function Canchas() {
           </div>
         ) : (
           <div className="divide-y divide-[#F2F1EE]">
-            {canchas.map((c) => (
-              <div
-                key={c.id}
-                className="grid grid-cols-[2fr_1fr_1fr_1fr_auto] items-center gap-3 px-5 py-3"
-              >
-                {/* Nombre + thumbnail */}
-                <div className="flex min-w-0 items-center gap-3">
-                  {c.imagen_url ? (
-                    <img
-                      src={c.imagen_url}
-                      alt={c.nombre}
-                      className="h-8 w-8 shrink-0 rounded-[6px] object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[6px] bg-[#F5F4F1]">
-                      <svg
-                        className="h-4 w-4 text-[#BCBAB5]"
-                        fill="none"
-                        viewBox="0 0 16 16"
-                        stroke="currentColor"
-                        strokeWidth={1.5}
-                      >
-                        <rect x="1" y="2" width="14" height="12" rx="1.5" />
-                        <line x1="8" y1="2" x2="8" y2="14" />
-                        <circle cx="8" cy="8" r="1.8" />
-                      </svg>
-                    </div>
-                  )}
-                  <span className="truncate text-[13px] font-semibold text-[#0d1a12]">
-                    {c.nombre}
-                  </span>
+            {canchas.map((c) => {
+              const thumbnail = c.imagen_url ? (
+                <img
+                  src={c.imagen_url}
+                  alt={c.nombre}
+                  className="h-8 w-8 shrink-0 rounded-[6px] object-cover"
+                />
+              ) : (
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[6px] bg-[#F5F4F1]">
+                  <svg
+                    className="h-4 w-4 text-[#BCBAB5]"
+                    fill="none"
+                    viewBox="0 0 16 16"
+                    stroke="currentColor"
+                    strokeWidth={1.5}
+                  >
+                    <rect x="1" y="2" width="14" height="12" rx="1.5" />
+                    <line x1="8" y1="2" x2="8" y2="14" />
+                    <circle cx="8" cy="8" r="1.8" />
+                  </svg>
                 </div>
+              )
 
-                {/* Tipo */}
-                <span className="text-[13px] text-[#6B6862]">{TIPO_LABELS[c.tipo]}</span>
-
-                {/* Slots/día */}
-                <span className="text-[13px] text-[#6B6862]">{c.slots_por_dia}</span>
-
-                {/* Estado badge */}
+              const estadoBadge = (
                 <span
                   className={`inline-flex h-[22px] w-fit items-center rounded-full px-2.5 text-[11px] font-semibold ${
                     c.estado === 'activa'
@@ -207,28 +186,72 @@ export default function Canchas() {
                 >
                   {c.estado === 'activa' ? 'Activa' : 'Inactiva'}
                 </span>
+              )
 
-                {/* Actions */}
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => openEdit(c)}
-                    className="h-[28px] rounded-[6px] border border-[#EBEBEA] px-3 text-[12px] font-semibold text-[#6B6862] transition-colors hover:bg-[#F5F4F1]"
-                  >
-                    Editar
-                  </button>
-                  <button
-                    onClick={() => setConfirm({ cancha: c })}
-                    className={`h-[28px] rounded-[6px] px-3 text-[12px] font-semibold transition-colors ${
-                      c.estado === 'activa'
-                        ? 'border border-[#EBEBEA] text-[#6B6862] hover:border-red-200 hover:bg-red-50 hover:text-red-500'
-                        : 'border border-[#EBEBEA] text-[#12D176] hover:bg-[#ECFDF3]'
-                    }`}
-                  >
-                    {c.estado === 'activa' ? 'Desactivar' : 'Activar'}
-                  </button>
+              const toggleBtn = (
+                <button
+                  onClick={() => setConfirm({ cancha: c })}
+                  className={`h-[28px] rounded-[6px] px-3 text-[12px] font-semibold transition-colors ${
+                    c.estado === 'activa'
+                      ? 'border border-[#EBEBEA] text-[#6B6862] hover:border-red-200 hover:bg-red-50 hover:text-red-500'
+                      : 'border border-[#EBEBEA] text-[#12D176] hover:bg-[#ECFDF3]'
+                  }`}
+                >
+                  {c.estado === 'activa' ? 'Desactivar' : 'Activar'}
+                </button>
+              )
+
+              return (
+                <div key={c.id}>
+                  {/* Mobile card */}
+                  <div className="flex items-start justify-between gap-3 px-4 py-3 sm:hidden">
+                    <div className="flex min-w-0 items-center gap-3">
+                      {thumbnail}
+                      <div className="min-w-0">
+                        <p className="truncate text-[13px] font-semibold text-[#0d1a12]">
+                          {c.nombre}
+                        </p>
+                        <p className="mt-0.5 text-[12px] text-[#9C9790]">
+                          {CANCHA_TIPO_LABEL[c.tipo]} · {c.slots_por_dia} slots/día
+                        </p>
+                        <div className="mt-2">{estadoBadge}</div>
+                      </div>
+                    </div>
+                    <div className="flex shrink-0 flex-col items-end gap-1.5">
+                      <button
+                        onClick={() => openEdit(c)}
+                        className="h-[28px] rounded-[6px] border border-[#EBEBEA] px-3 text-[12px] font-semibold text-[#6B6862] transition-colors hover:bg-[#F5F4F1]"
+                      >
+                        Editar
+                      </button>
+                      {toggleBtn}
+                    </div>
+                  </div>
+
+                  {/* Desktop row */}
+                  <div className="hidden sm:grid sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_160px] sm:items-center sm:gap-3 sm:px-5 sm:py-3">
+                    <div className="flex min-w-0 items-center gap-3">
+                      {thumbnail}
+                      <span className="truncate text-[13px] font-semibold text-[#0d1a12]">
+                        {c.nombre}
+                      </span>
+                    </div>
+                    <span className="text-[13px] text-[#6B6862]">{CANCHA_TIPO_LABEL[c.tipo]}</span>
+                    <span className="text-[13px] text-[#6B6862]">{c.slots_por_dia}</span>
+                    {estadoBadge}
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => openEdit(c)}
+                        className="h-[28px] rounded-[6px] border border-[#EBEBEA] px-3 text-[12px] font-semibold text-[#6B6862] transition-colors hover:bg-[#F5F4F1]"
+                      >
+                        Editar
+                      </button>
+                      {toggleBtn}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </div>

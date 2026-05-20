@@ -1,5 +1,6 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
+import { supabase } from '@/lib/supabase/client'
 
 function IconField() {
   return (
@@ -71,7 +72,7 @@ function IconSwords() {
 
 const STATS = [
   {
-    label: 'Total canchas',
+    label: 'Canchas activas',
     value: '—',
     icon: <IconField />,
     iconBg: 'bg-[#0d1a12]',
@@ -102,6 +103,15 @@ const STATS = [
 
 export default function Dashboard() {
   const gridRef = useRef<HTMLDivElement>(null)
+  const [canchaCount, setCanchaCount] = useState<number | null>(null)
+
+  useEffect(() => {
+    supabase
+      .from('canchas')
+      .select('*', { count: 'exact', head: true })
+      .eq('estado', 'activa')
+      .then(({ count }) => setCanchaCount(count ?? 0))
+  }, [])
 
   useEffect(() => {
     if (!gridRef.current) return
@@ -126,22 +136,25 @@ export default function Dashboard() {
       </div>
 
       <div ref={gridRef} className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {STATS.map((stat, i) => (
-          <div
-            key={i}
-            className="stat-card flex items-center gap-3.5 rounded-[12px] border border-[#EBEBEA] bg-white p-4"
-          >
+        {STATS.map((stat, i) => {
+          const value = i === 0 ? (canchaCount !== null ? String(canchaCount) : '—') : stat.value
+          return (
             <div
-              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] ${stat.iconBg} ${stat.iconColor}`}
+              key={i}
+              className="stat-card flex items-center gap-3.5 rounded-[12px] border border-[#EBEBEA] bg-white p-4"
             >
-              {stat.icon}
+              <div
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] ${stat.iconBg} ${stat.iconColor}`}
+              >
+                {stat.icon}
+              </div>
+              <div>
+                <p className="text-[22px] leading-none font-bold text-[#0d1a12]">{value}</p>
+                <p className="mt-0.5 text-[11px] text-[#9C9790]">{stat.label}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-[22px] leading-none font-bold text-[#0d1a12]">{stat.value}</p>
-              <p className="mt-0.5 text-[11px] text-[#9C9790]">{stat.label}</p>
-            </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
 
       <div className="overflow-hidden rounded-[12px] border border-[#EBEBEA] bg-white">

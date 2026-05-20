@@ -1,3 +1,21 @@
+import type { Cancha } from '@/types'
+
+// ─── CANCHAS ──────────────────────────────────────────────────────────────────
+
+export const CANCHA_TIPOS = [
+  { value: 'futbol5', label: 'Fútbol 5' },
+  { value: 'futbol6', label: 'Fútbol 6' },
+  { value: 'futbol7', label: 'Fútbol 7' },
+  { value: 'futbol11', label: 'Fútbol 11' },
+] as const
+
+export const CANCHA_TIPO_LABEL: Record<Cancha['tipo'], string> = {
+  futbol5: 'Fútbol 5',
+  futbol6: 'Fútbol 6',
+  futbol7: 'Fútbol 7',
+  futbol11: 'Fútbol 11',
+}
+
 // ─── NAVIGATION ───────────────────────────────────────────────────────────────
 
 export const NAV_LINKS = ['Canchas', 'Reservar', 'Retos'] as const

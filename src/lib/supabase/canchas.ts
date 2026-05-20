@@ -10,14 +10,8 @@ export async function getCanchas(): Promise<Cancha[]> {
   return data as Cancha[]
 }
 
-export async function createCancha(
-  values: Omit<Cancha, 'id' | 'created_at'>,
-): Promise<Cancha> {
-  const { data, error } = await supabase
-    .from('canchas')
-    .insert(values)
-    .select()
-    .single()
+export async function createCancha(values: Omit<Cancha, 'id' | 'created_at'>): Promise<Cancha> {
+  const { data, error } = await supabase.from('canchas').insert(values).select().single()
   if (error) throw error
   return data as Cancha
 }
