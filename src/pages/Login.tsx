@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '@/lib/supabase/client'
+import { useAuth } from '@/context/AuthContext'
 
 function translateError(msg: string): string {
   if (msg.includes('Invalid login credentials') || msg.includes('Email not confirmed'))
@@ -9,14 +10,29 @@ function translateError(msg: string): string {
   return 'Error al iniciar sesión'
 }
 
+function resolveDestination(search: string, rol: string | undefined): string {
+  const params = new URLSearchParams(search)
+  const redirect = params.get('redirect')
+  const safeRedirect = redirect && redirect.startsWith('/') && !redirect.startsWith('//')
+  return safeRedirect ? redirect : rol === 'admin' ? '/admin' : '/'
+}
+
 export default function Login() {
   const navigate = useNavigate()
   const location = useLocation()
+  const { user, profile, loading: authLoading } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+
+  // Redirect already-authenticated users and recover from race-condition redirects
+  // (ProtectedRoute can bounce the user here before AuthContext has set `user`)
+  useEffect(() => {
+    if (authLoading || !user) return
+    navigate(resolveDestination(location.search, profile?.rol), { replace: true })
+  }, [authLoading, user, profile, location.search, navigate])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -26,16 +42,12 @@ export default function Login() {
     if (error) {
       setError(translateError(error.message))
     } else if (data.user) {
-      const { data: profile } = await supabase
+      const { data: profileData } = await supabase
         .from('usuarios')
         .select('rol')
         .eq('id', data.user.id)
         .single()
-      const params = new URLSearchParams(location.search)
-      const redirect = params.get('redirect')
-      const safeRedirect = redirect && redirect.startsWith('/') && !redirect.startsWith('//')
-      const dest = safeRedirect ? redirect : profile?.rol === 'admin' ? '/admin' : '/'
-      navigate(dest)
+      navigate(resolveDestination(location.search, profileData?.rol))
     }
     setLoading(false)
   }
