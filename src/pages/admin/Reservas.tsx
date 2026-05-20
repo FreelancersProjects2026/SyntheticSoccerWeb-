@@ -186,8 +186,9 @@ export default function Reservas() {
             </p>
             <div className="flex gap-3">
               <button
+                disabled={acting}
                 onClick={() => setDialog(null)}
-                className="flex-1 rounded-2xl border border-[#E8E6E0] py-3 text-[13px] font-semibold text-[#57534E] transition-colors hover:border-[#121210]/20"
+                className="flex-1 rounded-2xl border border-[#E8E6E0] py-3 text-[13px] font-semibold text-[#57534E] transition-colors hover:border-[#121210]/20 disabled:opacity-50"
               >
                 Cancelar
               </button>
