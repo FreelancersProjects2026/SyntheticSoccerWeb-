@@ -4,11 +4,11 @@ import { supabase } from '@/lib/supabase/client'
 
 function translateError(msg: string): string {
   if (msg.includes('already registered') || msg.includes('already been registered'))
-    return 'Este correo ya está registrado'
+    return 'Si el correo es válido, recibirás un enlace de confirmación'
   if (msg.includes('Password should be at least'))
-    return 'La contraseña debe tener al menos 6 caracteres'
+    return 'Mínimo 8 caracteres con mayúscula, minúscula y número'
   if (msg.includes('Unable to validate email address')) return 'Correo electrónico inválido'
-  return msg
+  return 'Error al crear la cuenta'
 }
 
 export default function Register() {
@@ -31,8 +31,8 @@ export default function Register() {
       setError('Las contraseñas no coinciden')
       return
     }
-    if (password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres')
+    if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(password)) {
+      setError('Mínimo 8 caracteres con mayúscula, minúscula y número')
       return
     }
 
@@ -180,7 +180,7 @@ export default function Register() {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Mínimo 6 caracteres"
+                  placeholder="Mínimo 8 chars, mayús, minús y número"
                   required
                   className="w-full rounded-2xl border border-[#121210]/[0.10] bg-white px-4 py-3.5 pr-12 text-[14px] text-[#121210] transition-all duration-200 outline-none placeholder:text-[#C4BFB8] focus:border-[#072f1a]/60 focus:ring-3 focus:ring-[#072f1a]/[0.06]"
                 />

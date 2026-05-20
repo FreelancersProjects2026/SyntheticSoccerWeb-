@@ -3,10 +3,10 @@ import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase/client'
 
 function translateError(msg: string): string {
-  if (msg.includes('Invalid login credentials')) return 'Correo o contraseña incorrectos'
-  if (msg.includes('Email not confirmed')) return 'Confirma tu correo antes de ingresar'
+  if (msg.includes('Invalid login credentials') || msg.includes('Email not confirmed'))
+    return 'Correo o contraseña incorrectos'
   if (msg.includes('Too many requests')) return 'Demasiados intentos. Espera unos minutos'
-  return msg
+  return 'Error al iniciar sesión'
 }
 
 export default function Login() {
