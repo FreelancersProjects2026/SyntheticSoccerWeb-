@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import { getCanchas } from '@/lib/supabase/canchas'
 import { getSlotsTomados, createReserva } from '@/lib/supabase/reservas'
@@ -40,6 +41,7 @@ function formatFecha(fecha: string): { weekday: string; day: string; month: stri
 }
 
 export default function Reservar() {
+  const navigate = useNavigate()
   const { user } = useAuth()
   const [state, setState] = useState<ReservaState>({
     step: 1,
@@ -69,9 +71,15 @@ export default function Reservar() {
     const fecha = state.fecha
     let cancelled = false
     getSlotsTomados(canchaId, fecha)
-      .then((slots) => { if (!cancelled) setSlotsState({ loading: false, tomados: slots }) })
-      .catch(() => { if (!cancelled) setSlotsState({ loading: false, tomados: [] }) })
-    return () => { cancelled = true }
+      .then((slots) => {
+        if (!cancelled) setSlotsState({ loading: false, tomados: slots })
+      })
+      .catch(() => {
+        if (!cancelled) setSlotsState({ loading: false, tomados: [] })
+      })
+    return () => {
+      cancelled = true
+    }
   }, [state.step, state.cancha, state.fecha])
 
   function showToast(msg: string, type: 'success' | 'error') {
@@ -90,8 +98,7 @@ export default function Reservar() {
         slot_inicio: state.slot + ':00',
       })
       showToast('Reserva enviada, el admin la confirmará pronto.', 'success')
-      setState({ step: 1, cancha: null, fecha: null, slot: null })
-      setSlotsState({ loading: false, tomados: [] })
+      setTimeout(() => navigate('/'), 1500)
     } catch (err: unknown) {
       const isConflict =
         err instanceof Error &&
@@ -221,13 +228,13 @@ export default function Reservar() {
                     }}
                     className="group rounded-2xl border border-[#E8E6E0] bg-white py-4 text-center transition-all hover:border-[#072f1a] hover:bg-[#072f1a] active:scale-[0.97]"
                   >
-                    <p className="text-xs text-[#9C9790] group-hover:text-[#F2F0EB]/60 capitalize">
+                    <p className="text-xs text-[#9C9790] capitalize group-hover:text-[#F2F0EB]/60">
                       {weekday}
                     </p>
                     <p className="text-xl font-bold text-[#121210] group-hover:text-[#F2F0EB]">
                       {day}
                     </p>
-                    <p className="text-xs text-[#9C9790] group-hover:text-[#F2F0EB]/60 capitalize">
+                    <p className="text-xs text-[#9C9790] capitalize group-hover:text-[#F2F0EB]/60">
                       {month}
                     </p>
                   </button>
