@@ -9,3 +9,18 @@ export type Cancha = {
   imagen_url: string | null
   created_at: string
 }
+
+export type Reserva = {
+  id: string
+  cancha_id: string
+  usuario_id: string
+  fecha: string
+  slot_inicio: string
+  estado: 'pendiente' | 'confirmada' | 'cancelada'
+  created_at: string
+}
+
+export type ReservaConDetalles = Reserva & {
+  canchas: { nombre: string }
+  usuarios: { nombre: string }
+}
