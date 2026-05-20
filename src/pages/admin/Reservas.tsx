@@ -135,10 +135,10 @@ export default function Reservas() {
                 {filtered.map((r) => (
                   <tr key={r.id} className="border-b border-[#F2F1EE] last:border-0">
                     <td className="px-5 py-3.5 text-[13px] font-medium text-[#0d1a12]">
-                      {r.usuarios.nombre}
+                      {r.usuarios?.nombre ?? '—'}
                     </td>
                     <td className="px-5 py-3.5 text-[13px] text-[#57534E]">
-                      {r.canchas.nombre}
+                      {r.canchas?.nombre ?? '—'}
                     </td>
                     <td className="px-5 py-3.5 text-[13px] text-[#57534E]">{r.fecha}</td>
                     <td className="px-5 py-3.5 text-[13px] text-[#57534E]">
