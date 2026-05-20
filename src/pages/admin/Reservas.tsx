@@ -24,6 +24,7 @@ export default function Reservas() {
   const [dialog, setDialog] = useState<ConfirmDialog>(null)
   const [loading, setLoading] = useState(true)
   const [acting, setActing] = useState(false)
+  const [actionError, setActionError] = useState<string | null>(null)
 
   useEffect(() => {
     getReservas()
@@ -38,16 +39,18 @@ export default function Reservas() {
   async function handleAction() {
     if (!dialog) return
     setActing(true)
+    setActionError(null)
     try {
       await updateReservaEstado(dialog.id, dialog.action)
       setReservas((prev) =>
         prev.map((r) => (r.id === dialog.id ? { ...r, estado: dialog.action } : r)),
       )
+      setDialog(null)
     } catch (err) {
       console.error(err)
+      setActionError('No se pudo actualizar la reserva. Intenta de nuevo.')
     } finally {
       setActing(false)
-      setDialog(null)
     }
   }
 
@@ -152,13 +155,13 @@ export default function Reservas() {
                       {r.estado === 'pendiente' && (
                         <div className="flex gap-2">
                           <button
-                            onClick={() => setDialog({ id: r.id, action: 'confirmada' })}
+                            onClick={() => { setActionError(null); setDialog({ id: r.id, action: 'confirmada' }) }}
                             className="rounded-full bg-green-50 px-3 py-1 text-[11px] font-semibold text-green-700 transition-colors hover:bg-green-100"
                           >
                             Aprobar
                           </button>
                           <button
-                            onClick={() => setDialog({ id: r.id, action: 'cancelada' })}
+                            onClick={() => { setActionError(null); setDialog({ id: r.id, action: 'cancelada' }) }}
                             className="rounded-full bg-red-50 px-3 py-1 text-[11px] font-semibold text-red-600 transition-colors hover:bg-red-100"
                           >
                             Rechazar
@@ -184,6 +187,11 @@ export default function Reservas() {
             <p className="mb-7 text-[13px] text-[#9C9790]">
               Esta acción cambiará el estado de la reserva.
             </p>
+            {actionError && (
+              <p className="mb-4 rounded-xl bg-red-50 px-4 py-2.5 text-[12px] text-red-600">
+                {actionError}
+              </p>
+            )}
             <div className="flex gap-3">
               <button
                 disabled={acting}
