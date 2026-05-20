@@ -48,22 +48,30 @@ export default function Reservar() {
     slot: null,
   })
   const [canchas, setCanchas] = useState<Cancha[]>([])
-  const [slotsTomados, setSlotsTomados] = useState<string[]>([])
+  const [loadingCanchas, setLoadingCanchas] = useState(true)
+  const [slotsState, setSlotsState] = useState<{ loading: boolean; tomados: string[] }>({
+    loading: false,
+    tomados: [],
+  })
   const [submitting, setSubmitting] = useState(false)
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null)
 
   useEffect(() => {
     getCanchas()
       .then((all) => setCanchas(all.filter((c) => c.estado === 'activa')))
-      .catch(console.error)
+      .catch(() => setCanchas([]))
+      .finally(() => setLoadingCanchas(false))
   }, [])
 
   useEffect(() => {
-    if (state.step === 3 && state.cancha && state.fecha) {
-      getSlotsTomados(state.cancha.id, state.fecha)
-        .then(setSlotsTomados)
-        .catch(console.error)
-    }
+    if (!(state.step === 3 && state.cancha && state.fecha)) return
+    const canchaId = state.cancha.id
+    const fecha = state.fecha
+    let cancelled = false
+    getSlotsTomados(canchaId, fecha)
+      .then((slots) => { if (!cancelled) setSlotsState({ loading: false, tomados: slots }) })
+      .catch(() => { if (!cancelled) setSlotsState({ loading: false, tomados: [] }) })
+    return () => { cancelled = true }
   }, [state.step, state.cancha, state.fecha])
 
   function showToast(msg: string, type: 'success' | 'error') {
@@ -83,6 +91,7 @@ export default function Reservar() {
       })
       showToast('Reserva enviada, el admin la confirmará pronto.', 'success')
       setState({ step: 1, cancha: null, fecha: null, slot: null })
+      setSlotsState({ loading: false, tomados: [] })
     } catch (err: unknown) {
       const isConflict =
         err instanceof Error &&
@@ -91,8 +100,9 @@ export default function Reservar() {
         isConflict ? 'Ese horario ya fue reservado. Elige otro.' : 'Error al crear la reserva.',
         'error',
       )
+    } finally {
+      setSubmitting(false)
     }
-    setSubmitting(false)
   }
 
   const stepLabels = ['Cancha', 'Fecha', 'Horario']
@@ -159,28 +169,34 @@ export default function Reservar() {
         {/* Step 1: Cancha */}
         {state.step === 1 && (
           <div className="grid gap-4 sm:grid-cols-2">
-            {canchas.length === 0 && (
-              <p className="text-sm text-[#9C9790]">No hay canchas disponibles.</p>
+            {loadingCanchas ? (
+              <div className="col-span-2 flex items-center gap-3 text-sm text-[#9C9790]">
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#072f1a]/20 border-t-[#072f1a]" />
+                Cargando canchas...
+              </div>
+            ) : canchas.length === 0 ? (
+              <p className="col-span-2 text-sm text-[#9C9790]">No hay canchas disponibles.</p>
+            ) : (
+              canchas.map((c) => (
+                <button
+                  key={c.id}
+                  onClick={() => setState((s) => ({ ...s, step: 2, cancha: c }))}
+                  className="rounded-3xl border border-[#E8E6E0] bg-white p-5 text-left transition-all hover:border-[#072f1a]/30 hover:shadow-md active:scale-[0.98]"
+                >
+                  {c.imagen_url && (
+                    <img
+                      src={c.imagen_url}
+                      alt={c.nombre}
+                      className="mb-4 h-40 w-full rounded-2xl object-cover"
+                    />
+                  )}
+                  <p className="font-bold text-[#121210]">{c.nombre}</p>
+                  <p className="mt-1 text-sm text-[#9C9790]">
+                    {c.tipo} · ${c.precio_por_slot}/hora
+                  </p>
+                </button>
+              ))
             )}
-            {canchas.map((c) => (
-              <button
-                key={c.id}
-                onClick={() => setState((s) => ({ ...s, step: 2, cancha: c }))}
-                className="rounded-3xl border border-[#E8E6E0] bg-white p-5 text-left transition-all hover:border-[#072f1a]/30 hover:shadow-md active:scale-[0.98]"
-              >
-                {c.imagen_url && (
-                  <img
-                    src={c.imagen_url}
-                    alt={c.nombre}
-                    className="mb-4 h-40 w-full rounded-2xl object-cover"
-                  />
-                )}
-                <p className="font-bold text-[#121210]">{c.nombre}</p>
-                <p className="mt-1 text-sm text-[#9C9790]">
-                  {c.tipo} · ${c.precio_por_slot}/hora
-                </p>
-              </button>
-            ))}
           </div>
         )}
 
@@ -199,7 +215,10 @@ export default function Reservar() {
                 return (
                   <button
                     key={d}
-                    onClick={() => setState((s) => ({ ...s, step: 3, fecha: d }))}
+                    onClick={() => {
+                      setSlotsState({ loading: true, tomados: [] })
+                      setState((s) => ({ ...s, step: 3, fecha: d }))
+                    }}
                     className="group rounded-2xl border border-[#E8E6E0] bg-white py-4 text-center transition-all hover:border-[#072f1a] hover:bg-[#072f1a] active:scale-[0.97]"
                   >
                     <p className="text-xs text-[#9C9790] group-hover:text-[#F2F0EB]/60 capitalize">
@@ -227,30 +246,37 @@ export default function Reservar() {
             >
               ← Atrás
             </button>
-            <div className="mb-8 grid grid-cols-3 gap-3 sm:grid-cols-4">
-              {generateSlots(state.cancha.slots_por_dia).map((slot) => {
-                const taken = slotsTomados.some((t) => t.slice(0, 5) === slot)
-                const selected = state.slot === slot
-                return (
-                  <button
-                    key={slot}
-                    disabled={taken}
-                    onClick={() => setState((s) => ({ ...s, slot }))}
-                    className={`rounded-2xl border py-3 text-sm font-semibold transition-all ${
-                      taken
-                        ? 'cursor-not-allowed border-[#E8E6E0] bg-[#F5F4F1] text-[#BCBAB5] line-through'
-                        : selected
-                          ? 'border-[#072f1a] bg-[#072f1a] text-[#F2F0EB]'
-                          : 'border-[#E8E6E0] bg-white text-[#121210] hover:border-[#072f1a]/40 active:scale-[0.97]'
-                    }`}
-                  >
-                    {slot}
-                  </button>
-                )
-              })}
-            </div>
+            {slotsState.loading ? (
+              <div className="mb-8 flex items-center gap-3 text-sm text-[#9C9790]">
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#072f1a]/20 border-t-[#072f1a]" />
+                Cargando horarios...
+              </div>
+            ) : (
+              <div className="mb-8 grid grid-cols-3 gap-3 sm:grid-cols-4">
+                {generateSlots(state.cancha.slots_por_dia).map((slot) => {
+                  const taken = slotsState.tomados.some((t) => t.slice(0, 5) === slot)
+                  const selected = state.slot === slot
+                  return (
+                    <button
+                      key={slot}
+                      disabled={taken}
+                      onClick={() => setState((s) => ({ ...s, slot }))}
+                      className={`rounded-2xl border py-3 text-sm font-semibold transition-all ${
+                        taken
+                          ? 'cursor-not-allowed border-[#E8E6E0] bg-[#F5F4F1] text-[#BCBAB5] line-through'
+                          : selected
+                            ? 'border-[#072f1a] bg-[#072f1a] text-[#F2F0EB]'
+                            : 'border-[#E8E6E0] bg-white text-[#121210] hover:border-[#072f1a]/40 active:scale-[0.97]'
+                      }`}
+                    >
+                      {slot}
+                    </button>
+                  )
+                })}
+              </div>
+            )}
             <button
-              disabled={!state.slot || submitting}
+              disabled={!state.slot || submitting || slotsState.loading}
               onClick={handleConfirm}
               className="w-full rounded-2xl bg-[#12D176] py-4 text-sm font-bold text-[#072f1a] transition-all hover:bg-[#0fb86a] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40"
             >
