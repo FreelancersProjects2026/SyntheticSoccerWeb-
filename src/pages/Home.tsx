@@ -109,6 +109,12 @@ function Nav() {
               <span className="max-w-[120px] truncate px-3 py-2 text-[11px] font-semibold text-[#072f1a]">
                 {profile?.nombre ?? user.email}
               </span>
+              <Link
+                to="/mis-reservas"
+                className="rounded-full px-4 py-2 text-[11px] font-medium whitespace-nowrap text-[#57534E] transition-all duration-200 hover:bg-[#121210]/[0.05] hover:text-[#121210]"
+              >
+                Mis reservas
+              </Link>
               <button
                 onClick={handleSignOut}
                 className="rounded-full border border-[#121210]/[0.10] px-4 py-2 text-[11px] font-medium text-[#57534E] transition-all duration-200 hover:border-[#121210]/[0.20] hover:text-[#121210] active:scale-95"
@@ -201,6 +207,13 @@ function Nav() {
               <span className="text-sm font-semibold text-[#072f1a]">
                 {profile?.nombre ?? user.email}
               </span>
+              <Link
+                to="/mis-reservas"
+                onClick={() => setMenuOpen(false)}
+                className={CLS.btnOutline}
+              >
+                Mis reservas
+              </Link>
               <button onClick={handleSignOut} className={CLS.btnOutline}>
                 Salir
               </button>
@@ -244,7 +257,9 @@ function Hero() {
             </p>
 
             <div className="flex flex-wrap items-center gap-3">
-              <Link to="/reservar" className={CLS.btnDark}>Reservar ahora</Link>
+              <Link to="/reservar" className={CLS.btnDark}>
+                Reservar ahora
+              </Link>
               <button className={CLS.btnOutline}>Ver canchas →</button>
             </div>
 
@@ -407,7 +422,9 @@ function HowItWorks() {
               </span>
             </h2>
           </div>
-          <Link to="/reservar" className={CLS.btnGhost}>Empezar →</Link>
+          <Link to="/reservar" className={CLS.btnGhost}>
+            Empezar →
+          </Link>
         </div>
 
         <div className="grid gap-3 lg:grid-cols-3">
