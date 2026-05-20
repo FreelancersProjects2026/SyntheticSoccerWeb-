@@ -56,19 +56,31 @@ INSERT INTO storage.buckets (id, name, public)
 VALUES ('canchas-images', 'canchas-images', true)
 ON CONFLICT (id) DO NOTHING;
 
--- Storage: authenticated can upload
-CREATE POLICY "Authenticated can upload cancha images"
+-- Storage: admins can upload
+CREATE POLICY "Admins can upload cancha images"
   ON storage.objects
   FOR INSERT
   TO authenticated
-  WITH CHECK (bucket_id = 'canchas-images');
+  WITH CHECK (
+    bucket_id = 'canchas-images'
+    AND EXISTS (
+      SELECT 1 FROM public.usuarios
+      WHERE id = auth.uid() AND rol = 'admin'
+    )
+  );
 
--- Storage: authenticated can update
-CREATE POLICY "Authenticated can update cancha images"
+-- Storage: admins can update
+CREATE POLICY "Admins can update cancha images"
   ON storage.objects
   FOR UPDATE
   TO authenticated
-  USING (bucket_id = 'canchas-images');
+  USING (
+    bucket_id = 'canchas-images'
+    AND EXISTS (
+      SELECT 1 FROM public.usuarios
+      WHERE id = auth.uid() AND rol = 'admin'
+    )
+  );
 
 -- Storage: public read
 CREATE POLICY "Public can view cancha images"
