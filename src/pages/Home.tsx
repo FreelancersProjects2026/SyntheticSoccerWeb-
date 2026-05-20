@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { getCanchas } from '@/lib/supabase/canchas'
+import type { Cancha } from '@/types'
 import {
   NAV_LINKS,
   HERO_STATS,
@@ -71,15 +73,25 @@ function Nav() {
             }`}
           >
             <div className="mx-1 h-4 w-px shrink-0 bg-[#121210]/[0.10]" />
-            {NAV_LINKS.map((link) => (
-              <a
-                key={link}
-                href={`#${link.toLowerCase()}`}
-                className="rounded-full px-4 py-2 text-[11px] font-medium whitespace-nowrap text-[#57534E] transition-all duration-200 hover:bg-[#121210]/[0.05] hover:text-[#121210]"
-              >
-                {link}
-              </a>
-            ))}
+            {NAV_LINKS.map((link) =>
+              link === 'Reservar' ? (
+                <Link
+                  key={link}
+                  to="/reservar"
+                  className="rounded-full px-4 py-2 text-[11px] font-medium whitespace-nowrap text-[#57534E] transition-all duration-200 hover:bg-[#121210]/[0.05] hover:text-[#121210]"
+                >
+                  {link}
+                </Link>
+              ) : (
+                <a
+                  key={link}
+                  href={`#${link.toLowerCase()}`}
+                  className="rounded-full px-4 py-2 text-[11px] font-medium whitespace-nowrap text-[#57534E] transition-all duration-200 hover:bg-[#121210]/[0.05] hover:text-[#121210]"
+                >
+                  {link}
+                </a>
+              ),
+            )}
             <div className="mx-1 h-4 w-px shrink-0 bg-[#121210]/[0.10]" />
           </div>
 
@@ -99,6 +111,12 @@ function Nav() {
               <span className="max-w-[120px] truncate px-3 py-2 text-[11px] font-semibold text-[#072f1a]">
                 {profile?.nombre ?? user.email}
               </span>
+              <Link
+                to="/mis-reservas"
+                className="rounded-full px-4 py-2 text-[11px] font-medium whitespace-nowrap text-[#57534E] transition-all duration-200 hover:bg-[#121210]/[0.05] hover:text-[#121210]"
+              >
+                Mis reservas
+              </Link>
               <button
                 onClick={handleSignOut}
                 className="rounded-full border border-[#121210]/[0.10] px-4 py-2 text-[11px] font-medium text-[#57534E] transition-all duration-200 hover:border-[#121210]/[0.20] hover:text-[#121210] active:scale-95"
@@ -156,16 +174,27 @@ function Nav() {
 
         {/* Nav links */}
         <div className="flex h-[calc(100%-160px)] flex-col items-center justify-center gap-9">
-          {NAV_LINKS.map((link) => (
-            <a
-              key={link}
-              href={`#${link.toLowerCase()}`}
-              onClick={() => setMenuOpen(false)}
-              className="text-[2.8rem] font-extrabold tracking-[-0.02em] text-[#072f1a] transition-colors duration-200 hover:text-[#12D176]"
-            >
-              {link}
-            </a>
-          ))}
+          {NAV_LINKS.map((link) =>
+            link === 'Reservar' ? (
+              <Link
+                key={link}
+                to="/reservar"
+                onClick={() => setMenuOpen(false)}
+                className="text-[2.8rem] font-extrabold tracking-[-0.02em] text-[#072f1a] transition-colors duration-200 hover:text-[#12D176]"
+              >
+                {link}
+              </Link>
+            ) : (
+              <a
+                key={link}
+                href={`#${link.toLowerCase()}`}
+                onClick={() => setMenuOpen(false)}
+                className="text-[2.8rem] font-extrabold tracking-[-0.02em] text-[#072f1a] transition-colors duration-200 hover:text-[#12D176]"
+              >
+                {link}
+              </a>
+            ),
+          )}
         </div>
 
         {/* Auth */}
@@ -180,6 +209,13 @@ function Nav() {
               <span className="text-sm font-semibold text-[#072f1a]">
                 {profile?.nombre ?? user.email}
               </span>
+              <Link
+                to="/mis-reservas"
+                onClick={() => setMenuOpen(false)}
+                className={CLS.btnOutline}
+              >
+                Mis reservas
+              </Link>
               <button onClick={handleSignOut} className={CLS.btnOutline}>
                 Salir
               </button>
@@ -199,7 +235,10 @@ function Hero() {
       ref={sectionRef}
       className="relative flex min-h-screen items-center overflow-hidden bg-[#F9F9F8] pt-20"
     >
-      <div className="pointer-events-none absolute top-0 right-0 h-[600px] w-[600px] translate-x-1/4 -translate-y-1/4 rounded-full bg-[#12D176]/[0.05] blur-[120px]" />
+      <div
+        className="pointer-events-none absolute top-0 right-0 h-[600px] w-[600px] translate-x-1/4 -translate-y-1/4 rounded-full bg-[#12D176]/[0.05] blur-[120px]"
+        style={{ contain: 'layout paint' }}
+      />
 
       <div className="relative z-10 mx-auto w-full max-w-7xl px-6 py-16 lg:px-12">
         <div className="grid items-center gap-12 lg:grid-cols-[1fr_1.1fr] lg:gap-10">
@@ -220,7 +259,9 @@ function Hero() {
             </p>
 
             <div className="flex flex-wrap items-center gap-3">
-              <button className={CLS.btnDark}>Reservar ahora</button>
+              <Link to="/reservar" className={CLS.btnDark}>
+                Reservar ahora
+              </Link>
               <button className={CLS.btnOutline}>Ver canchas →</button>
             </div>
 
@@ -241,6 +282,11 @@ function Hero() {
             <img
               src="https://picsum.photos/seed/grassfield/900/720"
               alt="Cancha sintética"
+              width={900}
+              height={720}
+              loading="eager"
+              fetchPriority="high"
+              decoding="async"
               className="h-[280px] w-full object-cover sm:h-[420px] lg:h-[580px]"
               style={{ filter: 'sepia(5%) brightness(0.82) contrast(1.1) saturate(0.9)' }}
             />
@@ -303,11 +349,7 @@ function Features() {
   const { containerRef, titleRef } = useWordScrub()
 
   return (
-    <section
-      ref={containerRef}
-      id="canchas"
-      className="mx-auto w-full max-w-7xl px-6 py-32 lg:px-12 lg:py-48"
-    >
+    <section ref={containerRef} className="mx-auto w-full max-w-7xl px-6 py-32 lg:px-12 lg:py-48">
       <div className="mb-16 space-y-5">
         <p className={CLS.label}>Todo lo que necesitas</p>
         <h2
@@ -328,7 +370,7 @@ function Features() {
         </h2>
       </div>
 
-      <div className="grid grid-flow-dense auto-rows-[290px] grid-cols-3 gap-3">
+      <div className="grid grid-flow-dense grid-cols-1 gap-3 md:auto-rows-[290px] md:grid-cols-3">
         {FEATURES.map((f, i) => {
           const s = CARD_STYLES[f.variant]
           return (
@@ -357,6 +399,79 @@ function Features() {
   )
 }
 
+function CanchasSection() {
+  const [canchas, setCanchas] = useState<Cancha[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    getCanchas()
+      .then((all) => setCanchas(all.filter((c) => c.estado === 'activa')))
+      .catch(console.error)
+      .finally(() => setLoading(false))
+  }, [])
+
+  return (
+    <section id="canchas" className="mx-auto w-full max-w-7xl px-6 py-32 lg:px-12 lg:py-48">
+      <div className="mb-16 space-y-5">
+        <p className={CLS.label}>Disponibles ahora</p>
+        <h2 className="max-w-4xl text-[clamp(2.5rem,4.5vw,5rem)] leading-[0.9] font-extrabold tracking-tight text-[#121210]">
+          Nuestras canchas
+        </h2>
+      </div>
+
+      {loading ? (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="h-80 animate-pulse rounded-3xl bg-[#F5F4F1]" />
+          ))}
+        </div>
+      ) : canchas.length === 0 ? (
+        <p className="text-sm text-[#9C9790]">No hay canchas activas disponibles.</p>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {canchas.map((c) => (
+            <div
+              key={c.id}
+              className="group overflow-hidden rounded-3xl border border-[#E8E6E0] bg-white transition-all duration-500 hover:border-[#072f1a]/20 hover:shadow-lg"
+            >
+              {c.imagen_url ? (
+                <div className="h-48 overflow-hidden">
+                  <img
+                    src={c.imagen_url}
+                    alt={c.nombre}
+                    className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                  />
+                </div>
+              ) : (
+                <div className="flex h-48 items-center justify-center bg-[#F5F4F1]">
+                  <span className="text-sm text-[#BCBAB5]">Sin imagen</span>
+                </div>
+              )}
+              <div className="p-6">
+                <p className="text-lg font-bold text-[#121210]">{c.nombre}</p>
+                <p className="mt-1 text-sm text-[#9C9790]">
+                  {c.tipo} · ${c.precio_por_slot}/hora
+                </p>
+                {c.descripcion && (
+                  <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-[#57534E]">
+                    {c.descripcion}
+                  </p>
+                )}
+                <Link
+                  to="/reservar"
+                  className="mt-5 block rounded-2xl bg-[#072f1a] py-3 text-center text-sm font-bold text-[#F2F0EB] transition-all hover:bg-[#0d4526] active:scale-[0.99]"
+                >
+                  Reservar
+                </Link>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  )
+}
+
 function HowItWorks() {
   const { containerRef } = useStaggerEntrance('.step-card')
 
@@ -378,7 +493,9 @@ function HowItWorks() {
               </span>
             </h2>
           </div>
-          <button className={CLS.btnGhost}>Empezar →</button>
+          <Link to="/reservar" className={CLS.btnGhost}>
+            Empezar →
+          </Link>
         </div>
 
         <div className="grid gap-3 lg:grid-cols-3">
@@ -430,6 +547,10 @@ function RetosSection() {
             <img
               src="https://picsum.photos/seed/match700/700/500"
               alt="Partido en cancha"
+              width={700}
+              height={500}
+              loading="lazy"
+              decoding="async"
               className="h-full w-full object-cover"
               style={{ filter: 'sepia(5%) brightness(0.65) contrast(1.1)' }}
             />
@@ -461,7 +582,10 @@ function CTASection() {
   return (
     <section className="relative overflow-hidden bg-[#072f1a] py-32 lg:py-48">
       <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-        <div className="h-[600px] w-[600px] rounded-full bg-[#12D176]/[0.05] blur-[130px]" />
+        <div
+          className="h-[600px] w-[600px] rounded-full bg-[#12D176]/[0.05] blur-[130px]"
+          style={{ contain: 'layout paint' }}
+        />
       </div>
       <div className="relative z-10 mx-auto max-w-4xl px-6 text-center lg:px-12">
         <p className="mb-5 text-[11px] font-medium tracking-[0.3em] text-[#12D176] uppercase">
@@ -523,6 +647,7 @@ export default function Home() {
       <Hero />
       <MarqueeStrip />
       <Features />
+      <CanchasSection />
       <HowItWorks />
       <RetosSection />
       <CTASection />

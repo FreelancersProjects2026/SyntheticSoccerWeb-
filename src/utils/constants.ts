@@ -1,3 +1,21 @@
+import type { Cancha } from '@/types'
+
+// ─── CANCHAS ──────────────────────────────────────────────────────────────────
+
+export const CANCHA_TIPOS = [
+  { value: 'futbol5', label: 'Fútbol 5' },
+  { value: 'futbol6', label: 'Fútbol 6' },
+  { value: 'futbol7', label: 'Fútbol 7' },
+  { value: 'futbol11', label: 'Fútbol 11' },
+] as const
+
+export const CANCHA_TIPO_LABEL: Record<Cancha['tipo'], string> = {
+  futbol5: 'Fútbol 5',
+  futbol6: 'Fútbol 6',
+  futbol7: 'Fútbol 7',
+  futbol11: 'Fútbol 11',
+}
+
 // ─── NAVIGATION ───────────────────────────────────────────────────────────────
 
 export const NAV_LINKS = ['Canchas', 'Reservar', 'Retos'] as const
@@ -41,26 +59,26 @@ export const FEATURES: Feature[] = [
     desc: 'Elige fecha, horario y tipo de cancha. Confirma en segundos con disponibilidad en tiempo real.',
     image: 'https://picsum.photos/seed/reservation/800/500',
     variant: 'dark',
-    span: 'col-span-2 row-span-1',
+    span: 'h-[200px] col-span-1 md:h-auto md:col-span-2 md:row-span-1',
   },
   {
     title: 'Reta equipos',
     desc: 'Publica un reto, encuentra rivales y acepta partidos. Fútbol competitivo sin complicaciones.',
     image: 'https://picsum.photos/seed/soccer/600/900',
     variant: 'light',
-    span: 'col-span-1 row-span-2',
+    span: 'h-[260px] col-span-1 md:h-auto md:col-span-1 md:row-span-2',
   },
   {
     title: 'Calendario de turnos',
     desc: 'Todos tus turnos en un calendario interactivo. Cancela o reagenda con un toque.',
     variant: 'lime',
-    span: 'col-span-1 row-span-1',
+    span: 'h-[180px] col-span-1 md:h-auto md:col-span-1 md:row-span-1',
   },
   {
     title: 'Panel admin',
     desc: 'Dashboard para administradores: canchas, horarios y reservas desde un solo lugar.',
     variant: 'dark',
-    span: 'col-span-1 row-span-1',
+    span: 'h-[180px] col-span-1 md:h-auto md:col-span-1 md:row-span-1',
   },
 ]
 
