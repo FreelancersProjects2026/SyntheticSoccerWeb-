@@ -33,7 +33,8 @@ export default function Login() {
         .single()
       const params = new URLSearchParams(location.search)
       const redirect = params.get('redirect')
-      const dest = redirect?.startsWith('/') ? redirect : profile?.rol === 'admin' ? '/admin' : '/'
+      const safeRedirect = redirect && redirect.startsWith('/') && !redirect.startsWith('//')
+      const dest = safeRedirect ? redirect : profile?.rol === 'admin' ? '/admin' : '/'
       navigate(dest)
     }
     setLoading(false)

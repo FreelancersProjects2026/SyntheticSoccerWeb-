@@ -18,7 +18,7 @@ export default function ProtectedRoute({ children, requiredRole }: Props) {
     )
   }
 
-  if (!user) return <Navigate to={`/login?redirect=${location.pathname}`} replace />
+  if (!user) return <Navigate to={`/login?redirect=${encodeURIComponent(location.pathname)}`} replace />
   if (requiredRole && profile?.rol !== requiredRole) return <Navigate to="/" replace />
 
   return <>{children}</>
