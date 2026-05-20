@@ -26,32 +26,24 @@ const EMPTY: Omit<Cancha, 'id' | 'created_at'> = {
 }
 
 export default function CanchaModal({ open, cancha, onClose, onSave }: Props) {
-  const [form, setForm] = useState<Omit<Cancha, 'id' | 'created_at'>>(EMPTY)
+  const [form, setForm] = useState<Omit<Cancha, 'id' | 'created_at'>>(() =>
+    cancha
+      ? {
+          nombre: cancha.nombre,
+          tipo: cancha.tipo,
+          slots_por_dia: cancha.slots_por_dia,
+          precio_por_slot: cancha.precio_por_slot,
+          estado: cancha.estado,
+          descripcion: cancha.descripcion,
+          imagen_url: cancha.imagen_url,
+        }
+      : EMPTY,
+  )
   const [imageFile, setImageFile] = useState<File | null>(null)
-  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(() => cancha?.imagen_url ?? null)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
-
-  useEffect(() => {
-    if (!open) return
-    setForm(
-      cancha
-        ? {
-            nombre: cancha.nombre,
-            tipo: cancha.tipo,
-            slots_por_dia: cancha.slots_por_dia,
-            precio_por_slot: cancha.precio_por_slot,
-            estado: cancha.estado,
-            descripcion: cancha.descripcion,
-            imagen_url: cancha.imagen_url,
-          }
-        : EMPTY,
-    )
-    setImageFile(null)
-    setImagePreview(cancha?.imagen_url ?? null)
-    setError(null)
-  }, [open, cancha])
 
   useEffect(() => {
     return () => {

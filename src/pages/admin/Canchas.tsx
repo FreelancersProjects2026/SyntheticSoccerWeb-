@@ -235,6 +235,7 @@ export default function Canchas() {
 
       {/* Modal */}
       <CanchaModal
+        key={editing?.id ?? 'new'}
         open={modalOpen}
         cancha={editing}
         onClose={() => setModalOpen(false)}
