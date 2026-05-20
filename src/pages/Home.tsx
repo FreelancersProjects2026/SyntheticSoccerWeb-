@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { getCanchas } from '@/lib/supabase/canchas'
+import type { Cancha } from '@/types'
 import {
   NAV_LINKS,
   HERO_STATS,
@@ -349,7 +351,6 @@ function Features() {
   return (
     <section
       ref={containerRef}
-      id="canchas"
       className="mx-auto w-full max-w-7xl px-6 py-32 lg:px-12 lg:py-48"
     >
       <div className="mb-16 space-y-5">
@@ -397,6 +398,79 @@ function Features() {
           )
         })}
       </div>
+    </section>
+  )
+}
+
+function CanchasSection() {
+  const [canchas, setCanchas] = useState<Cancha[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    getCanchas()
+      .then((all) => setCanchas(all.filter((c) => c.estado === 'activa')))
+      .catch(console.error)
+      .finally(() => setLoading(false))
+  }, [])
+
+  return (
+    <section id="canchas" className="mx-auto w-full max-w-7xl px-6 py-32 lg:px-12 lg:py-48">
+      <div className="mb-16 space-y-5">
+        <p className={CLS.label}>Disponibles ahora</p>
+        <h2 className="max-w-4xl text-[clamp(2.5rem,4.5vw,5rem)] font-extrabold leading-[0.9] tracking-tight text-[#121210]">
+          Nuestras canchas
+        </h2>
+      </div>
+
+      {loading ? (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="h-80 animate-pulse rounded-3xl bg-[#F5F4F1]" />
+          ))}
+        </div>
+      ) : canchas.length === 0 ? (
+        <p className="text-sm text-[#9C9790]">No hay canchas activas disponibles.</p>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {canchas.map((c) => (
+            <div
+              key={c.id}
+              className="group overflow-hidden rounded-3xl border border-[#E8E6E0] bg-white transition-all duration-500 hover:border-[#072f1a]/20 hover:shadow-lg"
+            >
+              {c.imagen_url ? (
+                <div className="h-48 overflow-hidden">
+                  <img
+                    src={c.imagen_url}
+                    alt={c.nombre}
+                    className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                  />
+                </div>
+              ) : (
+                <div className="flex h-48 items-center justify-center bg-[#F5F4F1]">
+                  <span className="text-sm text-[#BCBAB5]">Sin imagen</span>
+                </div>
+              )}
+              <div className="p-6">
+                <p className="text-lg font-bold text-[#121210]">{c.nombre}</p>
+                <p className="mt-1 text-sm text-[#9C9790]">
+                  {c.tipo} · ${c.precio_por_slot}/hora
+                </p>
+                {c.descripcion && (
+                  <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-[#57534E]">
+                    {c.descripcion}
+                  </p>
+                )}
+                <Link
+                  to="/reservar"
+                  className="mt-5 block rounded-2xl bg-[#072f1a] py-3 text-center text-sm font-bold text-[#F2F0EB] transition-all hover:bg-[#0d4526] active:scale-[0.99]"
+                >
+                  Reservar
+                </Link>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </section>
   )
 }
@@ -576,6 +650,7 @@ export default function Home() {
       <Hero />
       <MarqueeStrip />
       <Features />
+      <CanchasSection />
       <HowItWorks />
       <RetosSection />
       <CTASection />
