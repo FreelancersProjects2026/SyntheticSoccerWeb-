@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
-import { getMisReservas } from '@/lib/supabase/reservas'
+import { getMisReservas, uploadComprobante, updateComprobanteUrl } from '@/lib/supabase/reservas'
 import type { ReservaConDetalles } from '@/types'
 
 const ESTADO_STYLES: Record<string, string> = {
@@ -28,8 +28,36 @@ function formatFechaLarga(fecha: string): string {
   })
 }
 
-function Comprobante({ reserva, onClose }: { reserva: ReservaConDetalles; onClose: () => void }) {
+function Comprobante({
+  reserva,
+  onClose,
+  onComprobanteUploaded,
+}: {
+  reserva: ReservaConDetalles
+  onClose: () => void
+  onComprobanteUploaded: (id: string, url: string) => void
+}) {
   const est = ESTADO_TICKET[reserva.estado]
+  const [uploading, setUploading] = useState(false)
+  const [localUrl, setLocalUrl] = useState<string | null>(reserva.comprobante_url)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+
+  async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    setUploadError(null)
+    try {
+      const url = await uploadComprobante(reserva.id, file)
+      await updateComprobanteUrl(reserva.id, url)
+      setLocalUrl(url)
+      onComprobanteUploaded(reserva.id, url)
+    } catch {
+      setUploadError('Error al subir. Intenta de nuevo.')
+    } finally {
+      setUploading(false)
+    }
+  }
 
   return (
     <div
@@ -121,6 +149,41 @@ function Comprobante({ reserva, onClose }: { reserva: ReservaConDetalles; onClos
             </div>
           </div>
 
+          {/* Comprobante upload — solo cuando confirmada */}
+          {reserva.estado === 'confirmada' && !localUrl && (
+            <label className="mt-5 block cursor-pointer rounded-2xl border-2 border-dashed border-[#E8E6E0] px-5 py-4 text-center transition-all hover:border-[#12D176]/50">
+              <input
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                disabled={uploading}
+                onChange={handleUpload}
+              />
+              {uploading ? (
+                <div className="flex items-center justify-center gap-2">
+                  <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[#072f1a]/20 border-t-[#072f1a]" />
+                  <span className="text-sm text-[#9C9790]">Subiendo...</span>
+                </div>
+              ) : (
+                <>
+                  <p className="text-[13px] font-semibold text-[#121210]">
+                    Subir comprobante de pago
+                  </p>
+                  <p className="mt-0.5 text-xs text-[#9C9790]">Foto del Sinpe o transferencia</p>
+                </>
+              )}
+            </label>
+          )}
+
+          {reserva.estado === 'confirmada' && localUrl && (
+            <div className="mt-5 flex items-center gap-2 rounded-2xl border border-green-200 bg-green-50 px-5 py-3.5">
+              <div className="h-2 w-2 rounded-full bg-[#12D176]" />
+              <span className="text-[13px] font-semibold text-green-700">Comprobante enviado</span>
+            </div>
+          )}
+
+          {uploadError && <p className="mt-2 text-center text-xs text-red-500">{uploadError}</p>}
+
           <Link
             to="/reservar"
             onClick={onClose}
@@ -165,6 +228,13 @@ export default function MisReservas() {
       .catch(console.error)
       .finally(() => setLoading(false))
   }, [user])
+
+  function handleComprobanteUploaded(reservaId: string, url: string) {
+    setReservas((prev) =>
+      prev.map((r) => (r.id === reservaId ? { ...r, comprobante_url: url } : r)),
+    )
+    setSelected((prev) => (prev ? { ...prev, comprobante_url: url } : null))
+  }
 
   return (
     <div className="min-h-screen bg-[#F9F9F8] px-6 py-16">
@@ -229,7 +299,13 @@ export default function MisReservas() {
         </div>
       </div>
 
-      {selected && <Comprobante reserva={selected} onClose={() => setSelected(null)} />}
+      {selected && (
+        <Comprobante
+          reserva={selected}
+          onClose={() => setSelected(null)}
+          onComprobanteUploaded={handleComprobanteUploaded}
+        />
+      )}
     </div>
   )
 }

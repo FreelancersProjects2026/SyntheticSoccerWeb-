@@ -17,10 +17,11 @@ export type Reserva = {
   fecha: string
   slot_inicio: string
   estado: 'pendiente' | 'confirmada' | 'cancelada'
+  comprobante_url: string | null
   created_at: string
 }
 
 export type ReservaConDetalles = Reserva & {
-  canchas: { nombre: string }
+  canchas: { nombre: string; precio_por_slot: number }
   usuarios: { nombre: string }
 }

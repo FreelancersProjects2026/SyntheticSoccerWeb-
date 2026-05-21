@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from 'react'
 import gsap from 'gsap'
-import { getReservas, updateReservaEstado } from '@/lib/supabase/reservas'
+import { getReservas, getReservaById, updateReservaEstado } from '@/lib/supabase/reservas'
 import type { ReservaConDetalles } from '@/types'
 
 type FilterTab = 'todas' | 'pendiente' | 'confirmada' | 'cancelada'
 type SortKey = 'usuario' | 'cancha' | 'fecha' | 'estado' | null
 type SortDir = 'asc' | 'desc'
 type DialogState = { id: string; action: 'confirmada' | 'cancelada' } | null
+type ComprobanteModal = ReservaConDetalles | null
 
 const ESTADO = {
   pendiente: {
@@ -132,16 +133,21 @@ function EmptyState({ search }: { search: string }) {
 
 function MobileCard({
   r,
+  onOpen,
   onApprove,
   onReject,
 }: {
   r: ReservaConDetalles
+  onOpen: () => void
   onApprove: () => void
   onReject: () => void
 }) {
   const est = ESTADO[r.estado as keyof typeof ESTADO]
   return (
-    <div className="space-y-3 p-5 transition-colors hover:bg-[#FAFAF9]">
+    <div
+      className="cursor-pointer space-y-3 p-5 transition-colors hover:bg-[#FAFAF9] active:bg-[#F5F4F1]"
+      onClick={onOpen}
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="truncate text-[13px] font-semibold text-[#0d1a12]">
@@ -162,13 +168,19 @@ function MobileCard({
       {r.estado === 'pendiente' && (
         <div className="flex gap-2 pt-1">
           <button
-            onClick={onApprove}
+            onClick={(e) => {
+              e.stopPropagation()
+              onApprove()
+            }}
             className="flex-1 rounded-full bg-emerald-50 py-2 text-[12px] font-semibold text-emerald-700 transition-colors hover:bg-emerald-100 active:scale-[0.98]"
           >
             Aprobar
           </button>
           <button
-            onClick={onReject}
+            onClick={(e) => {
+              e.stopPropagation()
+              onReject()
+            }}
             className="flex-1 rounded-full bg-red-50 py-2 text-[12px] font-semibold text-red-600 transition-colors hover:bg-red-100 active:scale-[0.98]"
           >
             Rechazar
@@ -258,6 +270,113 @@ function ActionDialog({
   )
 }
 
+function ReservaDetailModal({ r, onClose }: { r: ReservaConDetalles; onClose: () => void }) {
+  const est = ESTADO[r.estado as keyof typeof ESTADO]
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div
+        className="relative w-full max-w-md overflow-hidden rounded-[20px] bg-white shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-start justify-between border-b border-[#F2F1EE] px-5 py-4">
+          <div>
+            <p className="text-[11px] font-semibold tracking-[0.2em] text-[#12D176] uppercase">
+              Reserva
+            </p>
+            <p className="mt-0.5 text-[15px] font-bold text-[#0d1a12]">
+              {r.usuarios?.nombre ?? '—'}
+            </p>
+            <p className="mt-0.5 text-[12px] text-[#9C9790]">{r.canchas?.nombre ?? '—'}</p>
+          </div>
+          <button
+            onClick={onClose}
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#F5F4F1] text-[#9C9790] transition-colors hover:bg-[#EBEBEA] hover:text-[#57534E]"
+          >
+            <svg
+              className="h-3.5 w-3.5"
+              fill="none"
+              viewBox="0 0 14 14"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path strokeLinecap="round" d="M1 1l12 12M13 1L1 13" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Details */}
+        <div className="divide-y divide-[#F5F4F1] px-5">
+          <div className="flex items-center justify-between py-3">
+            <span className="text-[11px] font-semibold tracking-[0.06em] text-[#9C9790] uppercase">
+              Estado
+            </span>
+            <span
+              className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize ${est.pill}`}
+            >
+              <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: est.dot }} />
+              {r.estado}
+            </span>
+          </div>
+          <div className="flex items-center justify-between py-3">
+            <span className="text-[11px] font-semibold tracking-[0.06em] text-[#9C9790] uppercase">
+              Fecha
+            </span>
+            <span className="text-[13px] font-semibold text-[#0d1a12] tabular-nums">{r.fecha}</span>
+          </div>
+          <div className="flex items-center justify-between py-3">
+            <span className="text-[11px] font-semibold tracking-[0.06em] text-[#9C9790] uppercase">
+              Horario
+            </span>
+            <span className="text-[13px] font-semibold text-[#0d1a12] tabular-nums">
+              {r.slot_inicio.slice(0, 5)} hs
+            </span>
+          </div>
+          <div className="flex items-center justify-between py-3">
+            <span className="text-[11px] font-semibold tracking-[0.06em] text-[#9C9790] uppercase">
+              Total
+            </span>
+            <strong className="font-display text-[15px] font-extrabold text-[#072f1a]">
+              ₡{(r.canchas?.precio_por_slot ?? 0).toLocaleString('es-CR')}
+            </strong>
+          </div>
+        </div>
+
+        {/* Comprobante */}
+        {r.comprobante_url ? (
+          <>
+            <div className="mx-2 overflow-hidden rounded-xl bg-[#F9F9F8]">
+              <img
+                src={r.comprobante_url}
+                alt="Comprobante de pago"
+                className="max-h-[40vh] w-full object-contain"
+              />
+            </div>
+            <div className="flex justify-end px-5 py-3.5">
+              <a
+                href={r.comprobante_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[12px] font-semibold text-[#072f1a] transition-colors hover:text-[#12D176]"
+              >
+                Abrir original ↗
+              </a>
+            </div>
+          </>
+        ) : (
+          <div className="mx-5 mb-5 flex items-center gap-2 rounded-xl bg-[#F5F4F1] px-4 py-3">
+            <div className="h-1.5 w-1.5 rounded-full bg-[#BCBAB5]" />
+            <span className="text-[12px] text-[#9C9790]">Sin comprobante aún</span>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // ─── MAIN PAGE ────────────────────────────────────────────────────────────────
 
 export default function Reservas() {
@@ -267,6 +386,7 @@ export default function Reservas() {
   const [sortKey, setSortKey] = useState<SortKey>('fecha')
   const [sortDir, setSortDir] = useState<SortDir>('desc')
   const [dialog, setDialog] = useState<DialogState>(null)
+  const [comprobanteModal, setComprobanteModal] = useState<ComprobanteModal>(null)
   const [loading, setLoading] = useState(true)
   const [acting, setActing] = useState(false)
   const [actionError, setActionError] = useState<string | null>(null)
@@ -312,6 +432,18 @@ export default function Reservas() {
     else {
       setSortKey(key)
       setSortDir('asc')
+    }
+  }
+
+  async function openModal(r: ReservaConDetalles) {
+    setComprobanteModal(r) // show immediately with cached data
+    try {
+      const fresh = await getReservaById(r.id)
+      // only apply if user hasn't closed (or switched row) in the meantime
+      setComprobanteModal((current) => (current?.id === r.id ? fresh : current))
+      setReservas((prev) => prev.map((x) => (x.id === fresh.id ? fresh : x)))
+    } catch {
+      // keep cached data already shown
     }
   }
 
@@ -459,6 +591,7 @@ export default function Reservas() {
                 <MobileCard
                   key={r.id}
                   r={r}
+                  onOpen={() => openModal(r)}
                   onApprove={() => {
                     setActionError(null)
                     setDialog({ id: r.id, action: 'confirmada' })
@@ -501,7 +634,8 @@ export default function Reservas() {
                     return (
                       <tr
                         key={r.id}
-                        className="reserva-row group border-b border-[#F5F4F1] transition-colors duration-150 last:border-0 hover:bg-[#FAFAF9]"
+                        className="reserva-row group cursor-pointer border-b border-[#F5F4F1] transition-colors duration-150 last:border-0 hover:bg-[#FAFAF9]"
+                        onClick={() => openModal(r)}
                       >
                         <td className="px-5 py-3.5">
                           <span className="text-[13px] font-semibold text-[#0d1a12] transition-colors duration-150 group-hover:text-[#072f1a]">
@@ -532,7 +666,8 @@ export default function Reservas() {
                           {r.estado === 'pendiente' && (
                             <div className="flex gap-2">
                               <button
-                                onClick={() => {
+                                onClick={(e) => {
+                                  e.stopPropagation()
                                   setActionError(null)
                                   setDialog({ id: r.id, action: 'confirmada' })
                                 }}
@@ -541,7 +676,8 @@ export default function Reservas() {
                                 Aprobar
                               </button>
                               <button
-                                onClick={() => {
+                                onClick={(e) => {
+                                  e.stopPropagation()
                                   setActionError(null)
                                   setDialog({ id: r.id, action: 'cancelada' })
                                 }}
@@ -570,6 +706,10 @@ export default function Reservas() {
           onCancel={() => setDialog(null)}
           onConfirm={handleAction}
         />
+      )}
+
+      {comprobanteModal && (
+        <ReservaDetailModal r={comprobanteModal} onClose={() => setComprobanteModal(null)} />
       )}
     </div>
   )
