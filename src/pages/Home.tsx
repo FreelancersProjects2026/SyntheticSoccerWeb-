@@ -450,7 +450,11 @@ function CanchasSection() {
               <div className="p-6">
                 <p className="text-lg font-bold text-[#121210]">{c.nombre}</p>
                 <p className="mt-1 text-sm text-[#9C9790]">
-                  {c.tipo} · ${c.precio_por_slot}/hora
+                  {c.tipo} ·{' '}
+                  <strong className="font-bold text-[#121210]">
+                    ₡{c.precio_por_slot.toLocaleString('es-CR')}
+                  </strong>
+                  /hora
                 </p>
                 {c.descripcion && (
                   <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-[#57534E]">
