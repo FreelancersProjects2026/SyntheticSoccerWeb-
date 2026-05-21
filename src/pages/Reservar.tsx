@@ -6,7 +6,7 @@ import { getSlotsTomados, createReserva } from '@/lib/supabase/reservas'
 import type { Cancha } from '@/types'
 
 type ReservaState = {
-  step: 1 | 2 | 3
+  step: 1 | 2 | 3 | 4
   cancha: Cancha | null
   fecha: string | null
   slot: string | null
@@ -38,6 +38,12 @@ function formatFecha(fecha: string): { weekday: string; day: string; month: stri
   const day = date.toLocaleDateString('es-ES', { day: 'numeric' })
   const month = date.toLocaleDateString('es-ES', { month: 'short' })
   return { weekday, day, month }
+}
+
+function formatFechaLarga(fecha: string): string {
+  const [y, m, d] = fecha.split('-').map(Number)
+  const date = new Date(y, m - 1, d)
+  return date.toLocaleDateString('es-CR', { weekday: 'long', day: 'numeric', month: 'long' })
 }
 
 export default function Reservar() {
@@ -112,7 +118,7 @@ export default function Reservar() {
     }
   }
 
-  const stepLabels = ['Cancha', 'Fecha', 'Horario']
+  const stepLabels = ['Cancha', 'Fecha', 'Horario', 'Resumen']
 
   return (
     <div className="min-h-screen bg-[#F9F9F8] px-6 py-16">
@@ -143,12 +149,13 @@ export default function Reservar() {
             {state.step === 1 && 'Elige tu cancha'}
             {state.step === 2 && 'Elige la fecha'}
             {state.step === 3 && 'Elige el horario'}
+            {state.step === 4 && 'Confirma tu reserva'}
           </h1>
         </div>
 
         {/* Step indicator */}
         <div className="mb-10 flex items-center gap-3">
-          {([1, 2, 3] as const).map((n) => (
+          {([1, 2, 3, 4] as const).map((n) => (
             <div key={n} className="flex items-center gap-3">
               <div className="flex items-center gap-2">
                 <div
@@ -170,7 +177,7 @@ export default function Reservar() {
                   {stepLabels[n - 1]}
                 </span>
               </div>
-              {n < 3 && (
+              {n < 4 && (
                 <div
                   className={`h-px w-8 transition-all ${state.step > n ? 'bg-[#12D176]' : 'bg-[#E8E6E0]'}`}
                 />
@@ -205,7 +212,11 @@ export default function Reservar() {
                   )}
                   <p className="font-bold text-[#121210]">{c.nombre}</p>
                   <p className="mt-1 text-sm text-[#9C9790]">
-                    {c.tipo} · ${c.precio_por_slot}/hora
+                    {c.tipo} ·{' '}
+                    <strong className="font-bold text-[#121210]">
+                      ₡{c.precio_por_slot.toLocaleString('es-CR')}
+                    </strong>
+                    /hora
                   </p>
                 </button>
               ))
@@ -288,10 +299,109 @@ export default function Reservar() {
                 })}
               </div>
             )}
+
+            {/* Price preview */}
+            <div
+              className={`mb-4 flex items-center justify-between rounded-2xl border px-5 py-4 transition-all ${
+                state.slot
+                  ? 'border-[#072f1a]/20 bg-white'
+                  : 'border-[#E8E6E0] bg-[#F5F4F1] opacity-50'
+              }`}
+            >
+              <span className="text-sm text-[#9C9790]">Precio por hora</span>
+              <strong className="font-display text-xl font-extrabold text-[#072f1a]">
+                ₡{state.cancha.precio_por_slot.toLocaleString('es-CR')}
+              </strong>
+            </div>
+
             <button
-              disabled={!state.slot || submitting || slotsState.loading}
-              onClick={handleConfirm}
+              disabled={!state.slot || slotsState.loading}
+              onClick={() => setState((s) => ({ ...s, step: 4 }))}
               className="w-full rounded-2xl bg-[#12D176] py-4 text-sm font-bold text-[#072f1a] transition-all hover:bg-[#0fb86a] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Ver resumen →
+            </button>
+          </div>
+        )}
+
+        {/* Step 4: Resumen */}
+        {state.step === 4 && state.cancha && state.fecha && state.slot && (
+          <div>
+            <button
+              onClick={() => setState((s) => ({ ...s, step: 3 }))}
+              className="mb-6 text-sm text-[#9C9790] transition-colors hover:text-[#121210]"
+            >
+              ← Atrás
+            </button>
+
+            {/* Booking card */}
+            <div className="overflow-hidden rounded-3xl border border-[#E8E6E0] bg-white shadow-sm">
+              {/* Hero */}
+              {state.cancha.imagen_url ? (
+                <div className="relative h-48 overflow-hidden">
+                  <img
+                    src={state.cancha.imagen_url}
+                    alt={state.cancha.nombre}
+                    className="h-full w-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                  <div className="absolute right-6 bottom-5 left-6">
+                    <p className="mb-0.5 text-[10px] font-semibold tracking-[0.3em] text-[#12D176] uppercase">
+                      Tu reserva
+                    </p>
+                    <p className="font-display text-2xl font-extrabold text-white">
+                      {state.cancha.nombre}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-[#072f1a] px-6 py-5">
+                  <p className="mb-0.5 text-[10px] font-semibold tracking-[0.3em] text-[#12D176] uppercase">
+                    Tu reserva
+                  </p>
+                  <p className="font-display text-2xl font-extrabold text-[#F2F0EB]">
+                    {state.cancha.nombre}
+                  </p>
+                </div>
+              )}
+
+              {/* Detail rows */}
+              <div className="divide-y divide-[#E8E6E0]">
+                <div className="flex items-center justify-between px-6 py-4">
+                  <span className="text-sm text-[#9C9790]">Cancha</span>
+                  <span className="text-sm font-semibold text-[#121210]">
+                    {state.cancha.nombre} · {state.cancha.tipo}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between px-6 py-4">
+                  <span className="text-sm text-[#9C9790]">Fecha</span>
+                  <span className="text-sm font-semibold text-[#121210] capitalize">
+                    {formatFechaLarga(state.fecha)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between px-6 py-4">
+                  <span className="text-sm text-[#9C9790]">Horario</span>
+                  <span className="text-sm font-semibold text-[#121210]">{state.slot} hrs</span>
+                </div>
+
+                {/* Total row — dark emphasis */}
+                <div className="flex items-center justify-between bg-[#072f1a] px-6 py-5">
+                  <span className="text-sm font-medium text-[#F2F0EB]/60">Total a pagar</span>
+                  <strong className="font-display text-2xl font-extrabold text-[#12D176]">
+                    ₡{state.cancha.precio_por_slot.toLocaleString('es-CR')}
+                  </strong>
+                </div>
+              </div>
+            </div>
+
+            <p className="mt-5 text-center text-xs text-[#9C9790]">
+              Tu reserva quedará pendiente hasta que el administrador la confirme.
+            </p>
+
+            <button
+              disabled={submitting}
+              onClick={handleConfirm}
+              className="mt-4 w-full rounded-2xl bg-[#12D176] py-4 text-sm font-bold text-[#072f1a] transition-all hover:bg-[#0fb86a] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40"
             >
               {submitting ? 'Guardando...' : 'Confirmar reserva'}
             </button>
