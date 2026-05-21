@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
-import { getMisReservas } from '@/lib/supabase/reservas'
+import { getMisReservas, uploadComprobante, updateComprobanteUrl } from '@/lib/supabase/reservas'
+import { formatFechaCorta } from '@/utils/format'
+import { supabase } from '@/lib/supabase/client'
 import type { ReservaConDetalles } from '@/types'
 
 const ESTADO_STYLES: Record<string, string> = {
   pendiente: 'bg-yellow-50 text-yellow-700 border border-yellow-200',
   confirmada: 'bg-green-50 text-green-700 border border-green-200',
+  pagada: 'bg-blue-50 text-blue-700 border border-blue-200',
   cancelada: 'bg-red-50 text-red-600 border border-red-200',
 }
 
@@ -15,6 +18,7 @@ const BARCODE_OPACITIES = Array.from({ length: 42 }, () => (Math.random() > 0.5 
 const ESTADO_TICKET: Record<string, { label: string; color: string; dot: string }> = {
   pendiente: { label: 'Pendiente de aprobación', color: '#B45309', dot: '#F59E0B' },
   confirmada: { label: 'Confirmada', color: '#12D176', dot: '#12D176' },
+  pagada: { label: 'Pago aprobado', color: '#2563EB', dot: '#3B82F6' },
   cancelada: { label: 'Cancelada', color: '#DC2626', dot: '#DC2626' },
 }
 
@@ -28,8 +32,62 @@ function formatFechaLarga(fecha: string): string {
   })
 }
 
-function Comprobante({ reserva, onClose }: { reserva: ReservaConDetalles; onClose: () => void }) {
-  const est = ESTADO_TICKET[reserva.estado]
+function Toast({ message, onDismiss }: { message: string; onDismiss: () => void }) {
+  return (
+    <div className="fixed top-6 left-1/2 z-[60] flex w-[calc(100%-3rem)] max-w-sm -translate-x-1/2 items-start gap-3 rounded-2xl bg-[#072f1a] px-5 py-4 shadow-2xl">
+      <div className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-[#12D176]" />
+      <p className="flex-1 text-[13px] leading-snug font-semibold text-[#F2F0EB]">{message}</p>
+      <button
+        onClick={onDismiss}
+        className="shrink-0 text-[#F2F0EB]/50 transition-colors hover:text-[#F2F0EB]"
+        aria-label="Cerrar"
+      >
+        <svg
+          className="h-3.5 w-3.5"
+          fill="none"
+          viewBox="0 0 14 14"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <path strokeLinecap="round" d="M1 1l12 12M13 1L1 13" />
+        </svg>
+      </button>
+    </div>
+  )
+}
+
+function Comprobante({
+  reserva,
+  onClose,
+  onComprobanteUploaded,
+}: {
+  reserva: ReservaConDetalles
+  onClose: () => void
+  onComprobanteUploaded: (id: string, url: string) => void
+}) {
+  const est = ESTADO_TICKET[reserva.estado] ?? ESTADO_TICKET.pendiente
+  const [uploading, setUploading] = useState(false)
+  const [localUrl, setLocalUrl] = useState<string | null>(reserva.comprobante_url)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+
+  async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    setUploadError(null)
+    try {
+      const url = await uploadComprobante(reserva.id, file)
+      await updateComprobanteUrl(reserva.id, url)
+      setLocalUrl(url)
+      onComprobanteUploaded(reserva.id, url)
+    } catch {
+      setUploadError('Error al subir. Intenta de nuevo.')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const wasRejected = reserva.estado === 'confirmada' && !!reserva.rechazo_motivo && !localUrl
 
   return (
     <div
@@ -121,6 +179,68 @@ function Comprobante({ reserva, onClose }: { reserva: ReservaConDetalles; onClos
             </div>
           </div>
 
+          {/* Rejection notice — comprobante was rejected, re-upload needed */}
+          {wasRejected && (
+            <div className="mt-5 flex items-start gap-2.5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3.5">
+              <div className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
+              <div>
+                <p className="text-[13px] font-semibold text-amber-700">Comprobante rechazado</p>
+                {reserva.rechazo_motivo && (
+                  <p className="mt-0.5 text-[12px] text-amber-600">{reserva.rechazo_motivo}</p>
+                )}
+                <p className="mt-0.5 text-[12px] text-amber-600">Por favor sube uno nuevo.</p>
+              </div>
+            </div>
+          )}
+
+          {/* Upload zone — confirmada, no comprobante yet (or was rejected) */}
+          {reserva.estado === 'confirmada' && !localUrl && (
+            <label className="mt-5 block cursor-pointer rounded-2xl border-2 border-dashed border-[#E8E6E0] px-5 py-4 text-center transition-all hover:border-[#12D176]/50">
+              <input
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                disabled={uploading}
+                onChange={handleUpload}
+              />
+              {uploading ? (
+                <div className="flex items-center justify-center gap-2">
+                  <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[#072f1a]/20 border-t-[#072f1a]" />
+                  <span className="text-sm text-[#9C9790]">Subiendo...</span>
+                </div>
+              ) : (
+                <>
+                  <p className="text-[13px] font-semibold text-[#121210]">
+                    Subir comprobante de pago
+                  </p>
+                  <p className="mt-0.5 text-xs text-[#9C9790]">Foto del Sinpe o transferencia</p>
+                </>
+              )}
+            </label>
+          )}
+
+          {/* Awaiting review */}
+          {reserva.estado === 'confirmada' && localUrl && (
+            <div className="mt-5 flex items-center gap-2 rounded-2xl border border-green-200 bg-green-50 px-5 py-3.5">
+              <div className="h-2 w-2 rounded-full bg-[#12D176]" />
+              <span className="text-[13px] font-semibold text-green-700">
+                Comprobante enviado — pendiente de aprobación
+              </span>
+            </div>
+          )}
+
+          {/* Pago aprobado */}
+          {reserva.estado === 'pagada' && (
+            <div className="mt-5 flex items-center gap-2 rounded-2xl border border-blue-200 bg-blue-50 px-5 py-3.5">
+              <div className="h-2 w-2 rounded-full bg-blue-500" />
+              <span className="text-[13px] font-semibold text-blue-700">
+                ¡Pago aprobado — cancha confirmada!
+              </span>
+            </div>
+          )}
+
+          {uploadError && <p className="mt-2 text-center text-xs text-red-500">{uploadError}</p>}
+
           <Link
             to="/reservar"
             onClick={onClose}
@@ -157,6 +277,7 @@ export default function MisReservas() {
   const [reservas, setReservas] = useState<ReservaConDetalles[]>([])
   const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState<ReservaConDetalles | null>(null)
+  const [toast, setToast] = useState<string | null>(null)
 
   useEffect(() => {
     if (!user) return
@@ -166,8 +287,54 @@ export default function MisReservas() {
       .finally(() => setLoading(false))
   }, [user])
 
+  // Auto-dismiss toast after 6 s
+  useEffect(() => {
+    if (!toast) return
+    const t = setTimeout(() => setToast(null), 6000)
+    return () => clearTimeout(t)
+  }, [toast])
+
+  // Realtime: listen for estado changes on this user's reservas
+  useEffect(() => {
+    if (!user) return
+    const channel = supabase
+      .channel('mis-reservas-live')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'reservas',
+          filter: `usuario_id=eq.${user.id}`,
+        },
+        (payload) => {
+          const updated = payload.new as ReservaConDetalles
+          setReservas((prev) => prev.map((r) => (r.id === updated.id ? { ...r, ...updated } : r)))
+          setSelected((prev) => (prev?.id === updated.id ? { ...prev, ...updated } : prev))
+          if (updated.estado === 'pagada') {
+            setToast('¡Tu cancha está confirmada! Tu pago fue aprobado.')
+          } else if (updated.estado === 'confirmada' && updated.rechazo_motivo) {
+            setToast('Tu comprobante fue rechazado. Por favor sube uno nuevo.')
+          }
+        },
+      )
+      .subscribe()
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [user])
+
+  function handleComprobanteUploaded(reservaId: string, url: string) {
+    setReservas((prev) =>
+      prev.map((r) => (r.id === reservaId ? { ...r, comprobante_url: url } : r)),
+    )
+    setSelected((prev) => (prev ? { ...prev, comprobante_url: url } : null))
+  }
+
   return (
     <div className="min-h-screen bg-[#F9F9F8] px-6 py-16">
+      {toast && <Toast message={toast} onDismiss={() => setToast(null)} />}
+
       <div className="mx-auto max-w-2xl">
         <Link
           to="/"
@@ -204,14 +371,14 @@ export default function MisReservas() {
                     {r.canchas?.nombre ?? '—'}
                   </p>
                   <p className="mt-1 text-sm text-[#9C9790]">
-                    {r.fecha} · {r.slot_inicio.slice(0, 5)}
+                    {formatFechaCorta(r.fecha)} · {r.slot_inicio.slice(0, 5)}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
                   <span
-                    className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold capitalize ${ESTADO_STYLES[r.estado]}`}
+                    className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold capitalize ${ESTADO_STYLES[r.estado] ?? ''}`}
                   >
-                    {r.estado}
+                    {ESTADO_TICKET[r.estado]?.label ?? r.estado}
                   </span>
                   <svg
                     className="h-4 w-4 text-[#BCBAB5] transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-[#57534E]"
@@ -229,7 +396,14 @@ export default function MisReservas() {
         </div>
       </div>
 
-      {selected && <Comprobante reserva={selected} onClose={() => setSelected(null)} />}
+      {selected && (
+        <Comprobante
+          key={`${selected.id}-${selected.comprobante_url ?? 'none'}-${selected.estado}`}
+          reserva={selected}
+          onClose={() => setSelected(null)}
+          onComprobanteUploaded={handleComprobanteUploaded}
+        />
+      )}
     </div>
   )
 }
