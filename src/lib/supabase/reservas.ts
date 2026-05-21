@@ -7,7 +7,7 @@ export async function getSlotsTomados(canchaId: string, fecha: string): Promise<
     .select('slot_inicio')
     .eq('cancha_id', canchaId)
     .eq('fecha', fecha)
-    .in('estado', ['pendiente', 'confirmada'])
+    .in('estado', ['pendiente', 'confirmada', 'pagada'])
   if (error) throw error
   return (data as { slot_inicio: string }[]).map((r) => r.slot_inicio)
 }
@@ -71,5 +71,21 @@ export async function updateComprobanteUrl(reservaId: string, url: string): Prom
     .from('reservas')
     .update({ comprobante_url: url })
     .eq('id', reservaId)
+  if (error) throw error
+}
+
+export async function aprobarComprobante(id: string): Promise<void> {
+  const { error } = await supabase
+    .from('reservas')
+    .update({ estado: 'pagada', rechazo_motivo: null })
+    .eq('id', id)
+  if (error) throw error
+}
+
+export async function rechazarComprobante(id: string, motivo: string): Promise<void> {
+  const { error } = await supabase
+    .from('reservas')
+    .update({ estado: 'confirmada', comprobante_url: null, rechazo_motivo: motivo || null })
+    .eq('id', id)
   if (error) throw error
 }

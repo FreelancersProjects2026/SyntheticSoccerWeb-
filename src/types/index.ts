@@ -16,8 +16,9 @@ export type Reserva = {
   usuario_id: string
   fecha: string
   slot_inicio: string
-  estado: 'pendiente' | 'confirmada' | 'cancelada'
+  estado: 'pendiente' | 'confirmada' | 'pagada' | 'cancelada'
   comprobante_url: string | null
+  rechazo_motivo: string | null
   created_at: string
 }
 
