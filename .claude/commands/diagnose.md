@@ -88,6 +88,10 @@ Tool preference:
 
 **Perf branch.** For performance regressions, logs are usually wrong. Instead: establish a baseline measurement (timing harness, `performance.now()`, profiler, query plan), then bisect. Measure first, fix second.
 
+## Code edit rules
+
+Any file touch during fix -> SOLID. Future-maintainable. React rule: file max 150 lines. Over limit -> split.
+
 ## Phase 5 — Fix + regression test
 
 Write the regression test **before the fix** — but only if there is a **correct seam** for it.

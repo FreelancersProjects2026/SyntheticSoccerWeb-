@@ -16,6 +16,10 @@ pnpm type-check   # tsc --noEmit (no emit, just type errors)
 
 **Always use `pnpm`. Never use `npm` or `yarn`.**
 
+## Docker
+
+Optional dev env. See [DOCKER.md](./DOCKER.md).
+
 ## Project Purpose
 
 Booking platform for synthetic soccer fields (canchas sintéticas).
