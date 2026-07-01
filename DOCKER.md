@@ -16,13 +16,25 @@ Si vos (Claude) tocás deps en `package.json`, avisale al usuario correr `docker
 - Día a día: `pnpm dev` — sin cambio, sigue igual.
 - Máquina nueva / PC rota / setup roto: `docker compose up` — mismas deps y versiones que resto del equipo, sin instalar Node/pnpm a mano ni debuggear versión rara.
 
+## Supabase local (`supabase start`)
+
+Stack de Supabase (Postgres/Auth/Storage/Studio) corre en Docker aparte, vía el CLI (`supabase` ya es devDependency, sin instalar nada global). Es un stack de contenedores independiente del `docker-compose.yml` de la app — no comparten red, se hablan por `127.0.0.1`.
+
+```bash
+pnpm db:start   # supabase start — aplica supabase/migrations/* + supabase/seed.sql, imprime URL + anon key
+pnpm db:stop    # supabase stop
+pnpm db:reset   # supabase db reset — reaplica migraciones + seed desde cero
+```
+
+Requiere Docker Desktop corriendo, sea que uses `docker compose up` para la app o `pnpm dev` en el host — `supabase start` siempre levanta sus propios contenedores.
+
 ## Pasos para arrancar el proyecto (setup completo)
 
 1. **Clonar repo** + entrar a la carpeta.
 2. **Instalar pnpm** (repo fija `pnpm@10.33.2` vía campo `packageManager`, corepack lo maneja).
-3. **Conseguir `.env.local`** con el dueño del proyecto — necesita `VITE_SUPABASE_URL` + `VITE_SUPABASE_PUBLISHABLE_KEY`. Colocar en raíz del repo.
+3. **Levantar Supabase local**: `pnpm install` -> `pnpm db:start`. Copiar `.env.local.example` a `.env.local` (valores fijos del stack local, no hace falta pedirle nada al owner).
 4. **Correr proyecto** — 2 caminos, elegir uno:
-   - Host: `pnpm install` -> `pnpm dev` -> `localhost:5173`
+   - Host: `pnpm dev` -> `localhost:5173`
    - Docker (mismo entorno para los 3): `docker compose up` -> `localhost:5173`
 5. **Comandos de desarrollo** (igual en host o dentro del contenedor):
    - `pnpm lint` / `pnpm lint:fix`
