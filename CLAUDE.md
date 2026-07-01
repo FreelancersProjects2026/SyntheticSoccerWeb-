@@ -20,6 +20,10 @@ pnpm type-check   # tsc --noEmit (no emit, just type errors)
 
 Optional dev env. See [DOCKER.md](./DOCKER.md).
 
+## Supabase local
+
+DB local vía Docker, reglas de cuándo correr `db:start`/`db:reset`/`db:stop`. See [SUPABASE.md](./SUPABASE.md).
+
 ## Project Purpose
 
 Booking platform for synthetic soccer fields (canchas sintéticas).

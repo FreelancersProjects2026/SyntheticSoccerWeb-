@@ -15,6 +15,7 @@ Si vos (Claude) tocás deps en `package.json`, avisale al usuario correr `docker
 **¿Cuándo usar cada uno?**
 - Día a día: `pnpm dev` — sin cambio, sigue igual.
 - Máquina nueva / PC rota / setup roto: `docker compose up` — mismas deps y versiones que resto del equipo, sin instalar Node/pnpm a mano ni debuggear versión rara.
+- VS Code: "Reopen in Container" (usa `.devcontainer/devcontainer.json`, mismo Dockerfile/compose de arriba) — mismo entorno + extensions recomendadas ya instaladas, sin nada manual.
 
 ## Supabase local (`supabase start`)
 
