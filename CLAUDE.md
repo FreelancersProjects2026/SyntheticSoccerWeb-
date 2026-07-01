@@ -16,6 +16,14 @@ pnpm type-check   # tsc --noEmit (no emit, just type errors)
 
 **Always use `pnpm`. Never use `npm` or `yarn`.**
 
+## Docker
+
+Optional dev env. See [DOCKER.md](./DOCKER.md).
+
+## Supabase local
+
+DB local vía Docker, reglas de cuándo correr `db:start`/`db:reset`/`db:stop`. See [SUPABASE.md](./SUPABASE.md).
+
 ## Project Purpose
 
 Booking platform for synthetic soccer fields (canchas sintéticas).
@@ -181,23 +189,35 @@ Database and auth backend. Client singleton: `src/lib/supabase/client.ts`. Auth 
 
 ### For contributors (everyone)
 
-Create `.env.local` in the project root — ask the project owner for the values:
+Local dev runs against your own local Supabase stack (Postgres/Auth/Storage/Studio in Docker), not the shared remote project. Requires Docker Desktop running.
 
+```bash
+pnpm install
+pnpm db:start     # supabase start — applies supabase/migrations/* + supabase/seed.sql
+pnpm dev
 ```
-VITE_SUPABASE_URL=...
-VITE_SUPABASE_PUBLISHABLE_KEY=...
+
+`pnpm db:start` prints the local URL + anon key. Copy `.env.local.example` to `.env.local` — the values there are the standard Supabase CLI local-dev constants (same on every machine, not secrets), so no need to ask the owner.
+
+3 commands cover the whole local DB lifecycle:
+
+```bash
+pnpm db:start     # supabase start — boot local DB (once per session, or leave running)
+pnpm db:reset      # supabase db reset — apply new/changed migrations + reseed (run after every `git pull` that touches supabase/migrations/*)
+pnpm db:stop      # supabase stop — shut down local DB (optional, frees Docker resources)
 ```
+
+Seed creates a test admin: `admin@local.test` / `admin1234`.
 
 ### For the project owner only
 
 ```bash
-pnpm supabase init                          # one-time: creates supabase/migrations/
 pnpm supabase link --project-ref <ref>      # link local CLI to the remote project
 pnpm supabase migration new <name>          # create a new migration file
-pnpm supabase db push                       # apply pending migrations to remote
+pnpm supabase db push                       # apply pending migrations to remote (after validating locally via pnpm db:reset)
 ```
 
-Contributors never run `init` or `link` — they only need `.env.local`.
+Contributors never run `link` or `db push` — remote/staging stays owner-only.
 
 ## Role System
 
