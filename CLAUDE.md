@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Code Discovery
+
+**Always use the `codebase-memory` MCP tools first** when finding files, locating routes, searching for symbols/functions, or exploring "where is X defined" / "what calls Y". Use `search_graph`, `trace_path`, `get_architecture`, `get_code_snippet`, `query_graph` before falling back to Grep/Glob. Grep/Glob are fine for plain text search (strings, config values) but the graph is faster and more precise for structural questions.
+
 ## Commands
 
 ```bash
@@ -97,8 +101,10 @@ Custom theme tokens defined in `src/index.css` via `@theme`:
 ```
 src/
   components/
-    Button.tsx          stub — TODO
     ProtectedRoute.tsx  route guard (requiredRole prop)
+    admin/
+      CanchaModal.tsx   create/edit cancha form (modal)
+      ConfirmDialog.tsx generic confirm dialog
   context/
     AuthContext.tsx     auth state + profile, provides useAuth()
   hooks/
@@ -108,20 +114,27 @@ src/
     supabase/
       client.ts         Supabase singleton (VITE_SUPABASE_URL + VITE_SUPABASE_PUBLISHABLE_KEY)
       auth.ts           getSession(), onAuthStateChange(), AuthState type
+      canchas.ts        getCanchas, createCancha, updateCancha, uploadCanchaImage
+      reservas.ts       getSlotsTomados, createReserva, getReservas, getMisReservas,
+                         updateReservaEstado, uploadComprobante, updateComprobanteUrl,
+                         aprobarComprobante, rechazarComprobante
   pages/
     Home.tsx            landing page (hero, marquee, features bento, how-it-works, retos, CTA, footer)
     Login.tsx           split-panel login form, redirects by role on success
     Register.tsx        split-panel register form, upserts profile to usuarios table
+    Reservar.tsx        booking flow: pick cancha → date → open slot → createReserva
+    MisReservas.tsx     user's own reservations + comprobante upload
     admin/
       AdminLayout.tsx   collapsible sidebar + top header shell for all /admin/* routes
       Dashboard.tsx     stat cards (stub data) + recent activity skeleton
-      Canchas.tsx       empty state + "New field" button (non-functional)
-      Reservas.tsx      empty state table (non-functional)
+      Canchas.tsx       full CRUD (list, create/edit via CanchaModal, toggle estado)
+      Reservas.tsx      full list + aprobar/rechazar comprobante flow
       Usuarios.tsx      empty state table (non-functional)
   utils/
     constants.ts        NAV_LINKS, HERO_STATS, MARQUEE_ITEMS, FEATURES, STEPS, RETO_CHALLENGES, FOOTER_LINKS, CLS, CARD_STYLES
-    format.ts           stub — TODO
-  types/               stub — TODO: Cancha, Reserva, User, Reto interfaces
+    format.ts           formatFechaCorta, formatFechaLarga date helpers
+  types/
+    index.ts            Cancha, Reserva, ReservaConDetalles
   assets/              static images/fonts
   App.tsx              route definitions
   main.tsx             React entry point
@@ -134,6 +147,8 @@ src/
 /               Home (public)
 /login          Login (public, redirects if already authed)
 /register       Register (public, redirects if already authed)
+/reservar       Reservar (protected, any authed user)
+/mis-reservas   MisReservas (protected, any authed user)
 /admin          → AdminLayout
   /admin        Dashboard  (requiredRole: admin)
   /admin/canchas    Canchas    (requiredRole: admin)
@@ -180,11 +195,11 @@ Database and auth backend. Client singleton: `src/lib/supabase/client.ts`. Auth 
 |---|---|
 | `roles` | Lookup: `{ id: smallint, name: text }` — rows: 'cliente', 'administrador'. RLS: read-only for all. |
 | `usuarios` | User profiles: `{ id uuid FK auth.users, nombre, telefono, rol, created_at }`. RLS: users can read/update/insert only their own row. A trigger `handle_new_user()` auto-creates a profile on `auth.signup`, pulling `nombre` and `telefono` from `raw_user_meta_data`. |
+| `canchas` | Fields: `{ id uuid, nombre, tipo: 'futbol5'\|'futbol6'\|'futbol7'\|'futbol11', slots_por_dia, precio_por_slot, estado: 'activa'\|'inactiva', descripcion, imagen_url, created_at }`. RLS: any authenticated user can `SELECT`; only admins can `INSERT`/`UPDATE`. Images in public storage bucket `canchas-images` (admin-only upload). |
+| `reservas` | Bookings: `{ id uuid, cancha_id FK, usuario_id FK, fecha, slot_inicio, estado: 'pendiente'\|'confirmada'\|'pagada'\|'cancelada', comprobante_url, rechazo_motivo, created_at }`, unique on `(cancha_id, fecha, slot_inicio)`. RLS: users see/insert only their own rows (`usuario_id = auth.uid()`), admins see all and are the only ones who can update `estado`; a separate policy lets users update their own `comprobante_url`. Payment proof images in storage bucket `comprobantes`. |
 
 ### Pending Tables (not yet created)
 
-- `canchas` — soccer field records
-- `reservas` — bookings
 - `retos` — team challenges
 
 ### For contributors (everyone)
@@ -228,23 +243,24 @@ Auth and roles are fully implemented. Roles flow from Supabase `auth.users` → 
 
 Role-based rendering is gated at the route level via `ProtectedRoute`, not scattered in components.
 
-## Implementation Status (as of 2026-05-18)
+## Implementation Status (as of 2026-07-12)
 
 ### Done
 - Landing page with GSAP scroll animations (parallax, word scrub, staggered entrance)
 - Auth: email/password signup & login via Supabase
 - Role-based protected routes (`ProtectedRoute`)
 - `AuthContext` with profile fetching from `usuarios`
-- `usuarios` + `roles` DB tables with RLS + auto-create trigger
+- `usuarios`, `roles`, `canchas`, `reservas` DB tables with RLS + auto-create trigger
 - Admin layout shell (sidebar + header, responsive)
-- Admin stub pages: Dashboard (skeleton), Canchas, Reservas, Usuarios
+- Cancha CRUD (`admin/Canchas.tsx` + `CanchaModal.tsx`, image upload to `canchas-images`)
+- Booking flow (`Reservar.tsx`): slot picker filtered by `getSlotsTomados`, `createReserva`
+- User's own reservations (`MisReservas.tsx`) with comprobante (payment proof) upload
+- Admin reservation review (`admin/Reservas.tsx`): aprobar/rechazar comprobante, `estado` transitions
+- `src/types/index.ts` (Cancha, Reserva, ReservaConDetalles) and `src/utils/format.ts` (date helpers)
 
 ### Not yet implemented
-- Cancha CRUD (create/edit/delete fields in admin)
-- Reserva CRUD (booking flow for users)
 - Retos system (challenge matching)
-- Real data in Dashboard stats
-- `tipos`, `canchas`, `reservas`, `retos` DB migrations
-- `src/types/` shared interfaces (Cancha, Reserva, Reto)
-- `src/utils/format.ts` date/slot helpers
-- `src/components/Button.tsx` (only a stub exists)
+- Real data in Dashboard stats (still skeleton/stub)
+- `admin/Usuarios.tsx` (still an empty, non-functional table)
+- `retos` DB migration
+- `src/components/Button.tsx` — removed; no shared Button component exists, one hasn't been reintroduced
