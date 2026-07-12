@@ -45,4 +45,4 @@ Requiere Docker Desktop corriendo, sea que uses `docker compose up` para la app 
 6. **¿Cambiaron deps?** (`package.json`) usuarios de Docker corren `docker compose up --build` después de hacer pull.
 7. **Alias de path**: `@/` -> `src/`.
 8. **Auth/roles**: `AuthContext` -> `profile.rol` (`admin`/`user`), `ProtectedRoute` protege `/admin/*`.
-9. **Sin construir aún**: CRUD de canchas, CRUD de reservas, retos, datos reales del dashboard — ver CLAUDE.md sección "Implementation Status" para lista completa.
+9. **Sin construir aún**: CRUD de canchas, CRUD de reservas, retos, datos reales del dashboard — ver [STATUS.md](./STATUS.md) para lista completa.

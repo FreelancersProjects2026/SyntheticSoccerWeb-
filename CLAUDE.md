@@ -24,9 +24,12 @@ pnpm type-check   # tsc --noEmit (no emit, just type errors)
 
 Optional dev env. See [DOCKER.md](./DOCKER.md).
 
-## Supabase local
+## Supabase
 
-DB local vía Docker, reglas de cuándo correr `db:start`/`db:reset`/`db:stop`. See [SUPABASE.md](./SUPABASE.md).
+Database and auth backend. Client singleton: `src/lib/supabase/client.ts`. Auth helpers: `src/lib/supabase/auth.ts`.
+**Do not use `@supabase/ssr`** — Vite SPA, not Next.js. Token refresh is automatic in `supabase-js`.
+
+Local dev (Docker), DB table reference, and contributor/owner command rules: see [SUPABASE.md](./SUPABASE.md).
 
 ## Project Purpose
 
@@ -62,7 +65,7 @@ Booking platform for synthetic soccer fields (canchas sintéticas).
 `@/` resolves to `src/`. Defined in both `vite.config.ts` (runtime) and `tsconfig.app.json` (type checking).
 
 ```ts
-import { Button } from '@/components/Button'
+import { supabase } from '@/lib/supabase/client'
 ```
 
 ## TypeScript Config
@@ -183,57 +186,6 @@ Three reusable hooks in `src/hooks/useScrollAnimations.ts`:
 
 All hooks register ScrollTrigger internally and clean up on unmount. Import GSAP only from `gsap` — do not import ScrollTrigger separately (already registered in the hooks).
 
-## Supabase
-
-Database and auth backend. Client singleton: `src/lib/supabase/client.ts`. Auth helpers: `src/lib/supabase/auth.ts`.
-
-**Do not use `@supabase/ssr`** — Vite SPA, not Next.js. Token refresh is automatic in `supabase-js`.
-
-### Database Tables
-
-| Table | Description |
-|---|---|
-| `roles` | Lookup: `{ id: smallint, name: text }` — rows: 'cliente', 'administrador'. RLS: read-only for all. |
-| `usuarios` | User profiles: `{ id uuid FK auth.users, nombre, telefono, rol, created_at }`. RLS: users can read/update/insert only their own row. A trigger `handle_new_user()` auto-creates a profile on `auth.signup`, pulling `nombre` and `telefono` from `raw_user_meta_data`. |
-| `canchas` | Fields: `{ id uuid, nombre, tipo: 'futbol5'\|'futbol6'\|'futbol7'\|'futbol11', slots_por_dia, precio_por_slot, estado: 'activa'\|'inactiva', descripcion, imagen_url, created_at }`. RLS: any authenticated user can `SELECT`; only admins can `INSERT`/`UPDATE`. Images in public storage bucket `canchas-images` (admin-only upload). |
-| `reservas` | Bookings: `{ id uuid, cancha_id FK, usuario_id FK, fecha, slot_inicio, estado: 'pendiente'\|'confirmada'\|'pagada'\|'cancelada', comprobante_url, rechazo_motivo, created_at }`, unique on `(cancha_id, fecha, slot_inicio)`. RLS: users see/insert only their own rows (`usuario_id = auth.uid()`), admins see all and are the only ones who can update `estado`; a separate policy lets users update their own `comprobante_url`. Payment proof images in storage bucket `comprobantes`. |
-
-### Pending Tables (not yet created)
-
-- `retos` — team challenges
-
-### For contributors (everyone)
-
-Local dev runs against your own local Supabase stack (Postgres/Auth/Storage/Studio in Docker), not the shared remote project. Requires Docker Desktop running.
-
-```bash
-pnpm install
-pnpm db:start     # supabase start — applies supabase/migrations/* + supabase/seed.sql
-pnpm dev
-```
-
-`pnpm db:start` prints the local URL + anon key. Copy `.env.local.example` to `.env.local` — the values there are the standard Supabase CLI local-dev constants (same on every machine, not secrets), so no need to ask the owner.
-
-3 commands cover the whole local DB lifecycle:
-
-```bash
-pnpm db:start     # supabase start — boot local DB (once per session, or leave running)
-pnpm db:reset      # supabase db reset — apply new/changed migrations + reseed (run after every `git pull` that touches supabase/migrations/*)
-pnpm db:stop      # supabase stop — shut down local DB (optional, frees Docker resources)
-```
-
-Seed creates a test admin: `admin@local.test` / `admin1234`.
-
-### For the project owner only
-
-```bash
-pnpm supabase link --project-ref <ref>      # link local CLI to the remote project
-pnpm supabase migration new <name>          # create a new migration file
-pnpm supabase db push                       # apply pending migrations to remote (after validating locally via pnpm db:reset)
-```
-
-Contributors never run `link` or `db push` — remote/staging stays owner-only.
-
 ## Role System
 
 Auth and roles are fully implemented. Roles flow from Supabase `auth.users` → `usuarios.rol` → `AuthContext.profile.rol` → `ProtectedRoute`.
@@ -243,24 +195,6 @@ Auth and roles are fully implemented. Roles flow from Supabase `auth.users` → 
 
 Role-based rendering is gated at the route level via `ProtectedRoute`, not scattered in components.
 
-## Implementation Status (as of 2026-07-12)
+## Implementation Status
 
-### Done
-- Landing page with GSAP scroll animations (parallax, word scrub, staggered entrance)
-- Auth: email/password signup & login via Supabase
-- Role-based protected routes (`ProtectedRoute`)
-- `AuthContext` with profile fetching from `usuarios`
-- `usuarios`, `roles`, `canchas`, `reservas` DB tables with RLS + auto-create trigger
-- Admin layout shell (sidebar + header, responsive)
-- Cancha CRUD (`admin/Canchas.tsx` + `CanchaModal.tsx`, image upload to `canchas-images`)
-- Booking flow (`Reservar.tsx`): slot picker filtered by `getSlotsTomados`, `createReserva`
-- User's own reservations (`MisReservas.tsx`) with comprobante (payment proof) upload
-- Admin reservation review (`admin/Reservas.tsx`): aprobar/rechazar comprobante, `estado` transitions
-- `src/types/index.ts` (Cancha, Reserva, ReservaConDetalles) and `src/utils/format.ts` (date helpers)
-
-### Not yet implemented
-- Retos system (challenge matching)
-- Real data in Dashboard stats (still skeleton/stub)
-- `admin/Usuarios.tsx` (still an empty, non-functional table)
-- `retos` DB migration
-- `src/components/Button.tsx` — removed; no shared Button component exists, one hasn't been reintroduced
+What's done and what's pending: see [STATUS.md](./STATUS.md).
